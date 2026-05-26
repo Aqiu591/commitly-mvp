@@ -22,10 +22,12 @@ describe("Commitly core flow", () => {
         source_summary: "Two commitments.",
         language: "zh-CN",
         warnings: [],
+        excluded_candidates: [],
         commitments: [
           {
             provisional_id: "c1",
             direction: "i_owe",
+            direction_reason: "“我发报价”说明己方欠客户交付。",
             title: "发送报价",
             details: "明天发送报价",
             owner: "我",
@@ -34,6 +36,7 @@ describe("Commitly core flow", () => {
             due_date: "2026-05-25",
             due_time: null,
             due_timezone: "Asia/Shanghai",
+            due_date_reason: "communicated_at 所在时区的明天是 2026-05-25。",
             suggested_follow_up_date: null,
             confidence: 0.93,
             confidence_reason: "明确承诺和日期",
@@ -45,6 +48,7 @@ describe("Commitly core flow", () => {
           {
             provisional_id: "c2",
             direction: "they_owe",
+            direction_reason: "李总是客户联系人，应由对方提供采购名单。",
             title: "提供采购名单",
             details: "周三给采购名单",
             owner: "李总",
@@ -53,6 +57,7 @@ describe("Commitly core flow", () => {
             due_date: "2026-05-27",
             due_time: null,
             due_timezone: "Asia/Shanghai",
+            due_date_reason: "communicated_at 所在周的周三是 2026-05-27。",
             suggested_follow_up_date: null,
             confidence: 0.91,
             confidence_reason: "明确承诺和日期",

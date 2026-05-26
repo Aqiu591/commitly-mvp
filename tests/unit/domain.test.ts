@@ -21,10 +21,12 @@ describe("domain helpers", () => {
         source_summary: "Follow-up promised.",
         language: "zh-CN",
         warnings: [],
+        excluded_candidates: [],
         commitments: [
           {
             provisional_id: "c1",
             direction: "i_owe",
+            direction_reason: "原文里的“我”是己方。",
             title: "发送材料",
             details: "回头发送材料",
             owner: "我",
@@ -33,6 +35,7 @@ describe("domain helpers", () => {
             due_date: null,
             due_time: null,
             due_timezone: null,
+            due_date_reason: "回头发没有明确日期，适合设置跟进日期。",
             suggested_follow_up_date: "2026-05-27",
             confidence: 0.68,
             confidence_reason: "时间较模糊",
@@ -60,10 +63,12 @@ describe("domain helpers", () => {
         source_summary: "Discussion only.",
         language: "zh-CN",
         warnings: [],
+        excluded_candidates: [],
         commitments: [
           {
             provisional_id: "c1",
             direction: "they_owe",
+            direction_reason: "候选动作来自客户。",
             title: "可能安排会议",
             details: "如果预算批了再看",
             owner: "客户",
@@ -72,6 +77,7 @@ describe("domain helpers", () => {
             due_date: null,
             due_time: null,
             due_timezone: null,
+            due_date_reason: "条件未成立且没有明确日期。",
             suggested_follow_up_date: null,
             confidence: 0.4,
             confidence_reason: "条件未成立",

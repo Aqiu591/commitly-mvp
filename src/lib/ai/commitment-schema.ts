@@ -13,6 +13,7 @@ const nullableTime = z
 export const aiCommitmentSchema = z.object({
   provisional_id: z.string().min(1),
   direction: z.enum(["i_owe", "they_owe"]),
+  direction_reason: z.string().min(1),
   title: z.string().min(1),
   details: z.string(),
   owner: z.string().min(1),
@@ -21,6 +22,7 @@ export const aiCommitmentSchema = z.object({
   due_date: nullableDate,
   due_time: nullableTime,
   due_timezone: z.string().nullable(),
+  due_date_reason: z.string().min(1),
   suggested_follow_up_date: nullableDate,
   confidence: z.number().min(0).max(1),
   confidence_reason: z.string(),
@@ -34,19 +36,38 @@ export const aiCommitmentSchema = z.object({
       "ambiguous_owner",
       "insufficient_evidence",
       "conditional_language",
-      "no_due_date"
+      "no_due_date",
+      "relative_due_date",
+      "dependent_due_date",
+      "needs_follow_up"
     ])
   )
+});
+
+export const excludedCandidateSchema = z.object({
+  evidence: z.string().min(1),
+  reason: z.enum([
+    "pure_discussion",
+    "greeting",
+    "unaccepted_intention",
+    "unmet_condition",
+    "insufficient_action",
+    "dependent_date",
+    "out_of_scope"
+  ]),
+  explanation: z.string().min(1)
 });
 
 export const commitmentExtractionSchema = z.object({
   source_summary: z.string(),
   language: z.string(),
   warnings: z.array(z.string()),
+  excluded_candidates: z.array(excludedCandidateSchema),
   commitments: z.array(aiCommitmentSchema)
 });
 
 export type AiCommitment = z.infer<typeof aiCommitmentSchema>;
+export type ExcludedCandidate = z.infer<typeof excludedCandidateSchema>;
 export type CommitmentExtraction = z.infer<typeof commitmentExtractionSchema>;
 
 const nullableStringSchema = {
@@ -61,7 +82,7 @@ const nullableDateSchema = {
 export const COMMITMENT_EXTRACTION_JSON_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["source_summary", "language", "warnings", "commitments"],
+  required: ["source_summary", "language", "warnings", "excluded_candidates", "commitments"],
   properties: {
     source_summary: {
       type: "string",
@@ -75,6 +96,37 @@ export const COMMITMENT_EXTRACTION_JSON_SCHEMA = {
       type: "array",
       items: { type: "string" }
     },
+    excluded_candidates: {
+      type: "array",
+      description: "Candidates that looked promise-like but should not become draft commitments.",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["evidence", "reason", "explanation"],
+        properties: {
+          evidence: {
+            type: "string",
+            description: "Exact short phrase from the source text."
+          },
+          reason: {
+            type: "string",
+            enum: [
+              "pure_discussion",
+              "greeting",
+              "unaccepted_intention",
+              "unmet_condition",
+              "insufficient_action",
+              "dependent_date",
+              "out_of_scope"
+            ]
+          },
+          explanation: {
+            type: "string",
+            description: "Why this candidate should not create a draft commitment."
+          }
+        }
+      }
+    },
     commitments: {
       type: "array",
       items: {
@@ -83,6 +135,7 @@ export const COMMITMENT_EXTRACTION_JSON_SCHEMA = {
         required: [
           "provisional_id",
           "direction",
+          "direction_reason",
           "title",
           "details",
           "owner",
@@ -91,6 +144,7 @@ export const COMMITMENT_EXTRACTION_JSON_SCHEMA = {
           "due_date",
           "due_time",
           "due_timezone",
+          "due_date_reason",
           "suggested_follow_up_date",
           "confidence",
           "confidence_reason",
@@ -108,6 +162,10 @@ export const COMMITMENT_EXTRACTION_JSON_SCHEMA = {
             type: "string",
             enum: ["i_owe", "they_owe"],
             description: "i_owe means the signed-in user owes the customer/contact. they_owe means the customer/contact owes the user."
+          },
+          direction_reason: {
+            type: "string",
+            description: "Brief reason grounded in the speaker/counterparty wording."
           },
           title: {
             type: "string",
@@ -135,6 +193,10 @@ export const COMMITMENT_EXTRACTION_JSON_SCHEMA = {
             description: "HH:mm in due_timezone, or null."
           },
           due_timezone: nullableStringSchema,
+          due_date_reason: {
+            type: "string",
+            description: "Brief explanation of the resolved due date, null due date, or follow-up date."
+          },
           suggested_follow_up_date: nullableDateSchema,
           confidence: {
             type: "number",
@@ -162,7 +224,10 @@ export const COMMITMENT_EXTRACTION_JSON_SCHEMA = {
                 "ambiguous_owner",
                 "insufficient_evidence",
                 "conditional_language",
-                "no_due_date"
+                "no_due_date",
+                "relative_due_date",
+                "dependent_due_date",
+                "needs_follow_up"
               ]
             }
           }

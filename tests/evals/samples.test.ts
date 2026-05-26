@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import samples from "./zh-commitment-samples.json";
+import { EVAL_METRICS } from "./scoring";
 
 describe("Chinese eval samples", () => {
   it("contains the MVP eval set", () => {
@@ -14,14 +15,9 @@ describe("Chinese eval samples", () => {
       expect(sample).toHaveProperty("expected");
       expect(sample.expected).toHaveProperty("commitmentCount");
       expect(sample.expected).toHaveProperty("metrics");
-      expect(sample.expected.metrics).toEqual([
-        "漏提",
-        "误提",
-        "日期误判",
-        "方向误判",
-        "编辑率",
-        "删除率"
-      ]);
+      expect(sample.expected.metrics).toEqual(EVAL_METRICS);
+      expect(sample.expected.directions).toHaveLength(sample.expected.commitmentCount);
+      expect(sample.expected.dueDates).toHaveLength(sample.expected.commitmentCount);
     }
   });
 });

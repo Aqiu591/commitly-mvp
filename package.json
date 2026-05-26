@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
-    "eval:samples": "vitest run tests/evals"
+    "eval:samples": "vitest run tests/evals",
+    "eval:openai": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/commitly-openai-eval.ps1"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
