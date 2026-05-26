@@ -1,0 +1,36 @@
+{
+  "name": "commitly-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "doctor": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/commitly-doctor.ps1",
+    "doctor:full": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/commitly-doctor.ps1 -Full",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "eval:samples": "vitest run tests/evals"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.48.1",
+    "lucide-react": "^0.468.0",
+    "next": "^15.3.3",
+    "openai": "^5.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "resend": "^4.5.1",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

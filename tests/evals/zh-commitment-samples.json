@@ -1,0 +1,264 @@
+[
+  {
+    "id": "zh-001",
+    "sourceType": "会议纪要",
+    "communicatedAt": "2026-05-20T02:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "我明天下午把新版报价发你，王总周五前给我们采购名单。",
+    "expected": {
+      "commitmentCount": 2,
+      "directions": ["i_owe", "they_owe"],
+      "dueDates": ["2026-05-21", "2026-05-22"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-002",
+    "sourceType": "微信",
+    "communicatedAt": "2026-05-20T10:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "辛苦了，今天聊得很清楚。后面如果领导同意，我们再安排合同。",
+    "expected": {
+      "commitmentCount": 0,
+      "directions": [],
+      "dueDates": [],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-003",
+    "sourceType": "邮件",
+    "communicatedAt": "2026-05-21T01:30:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "我回头发你产品截图，暂时没有准确时间。",
+    "expected": {
+      "commitmentCount": 1,
+      "directions": ["i_owe"],
+      "dueDates": [null],
+      "suggestedFollowUp": true,
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-004",
+    "sourceType": "电话记录",
+    "communicatedAt": "2026-05-21T06:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "客户说下周三上午十点前把测试账号开好，我们收到后当天验证。",
+    "expected": {
+      "commitmentCount": 2,
+      "directions": ["they_owe", "i_owe"],
+      "dueDates": ["2026-05-27", "2026-05-27"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-005",
+    "sourceType": "Slack",
+    "communicatedAt": "2026-05-22T07:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "只是同步一下风险，没有人承诺具体动作。大家先观察两天。",
+    "expected": {
+      "commitmentCount": 0,
+      "directions": [],
+      "dueDates": [],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-006",
+    "sourceType": "会议纪要",
+    "communicatedAt": "2026-05-22T03:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "我们本月底前完成接口文档，客户六月三日前确认字段映射。",
+    "expected": {
+      "commitmentCount": 2,
+      "directions": ["i_owe", "they_owe"],
+      "dueDates": ["2026-05-31", "2026-06-03"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-007",
+    "sourceType": "邮件",
+    "communicatedAt": "2026-05-23T02:20:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "如果法务这周能过，我们下周一发正式合同。",
+    "expected": {
+      "commitmentCount": 0,
+      "directions": [],
+      "dueDates": [],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-008",
+    "sourceType": "微信",
+    "communicatedAt": "2026-05-23T14:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "客户：明早九点前我给你盖章版。我们：收到后中午前回传付款申请。",
+    "expected": {
+      "commitmentCount": 2,
+      "directions": ["they_owe", "i_owe"],
+      "dueDates": ["2026-05-24", "2026-05-24"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-009",
+    "sourceType": "飞书",
+    "communicatedAt": "2026-05-24T09:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "好的，资料我稍后整理给你。客户没有说他们什么时候回。",
+    "expected": {
+      "commitmentCount": 1,
+      "directions": ["i_owe"],
+      "dueDates": [null],
+      "suggestedFollowUp": true,
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-010",
+    "sourceType": "会议纪要",
+    "communicatedAt": "2026-05-24T01:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "对方承诺今天下班前补充三位参会人邮箱。",
+    "expected": {
+      "commitmentCount": 1,
+      "directions": ["they_owe"],
+      "dueDates": ["2026-05-24"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-011",
+    "sourceType": "电话记录",
+    "communicatedAt": "2026-05-24T13:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "我觉得可以考虑做一个复盘，但还没有定谁来做，也没有时间。",
+    "expected": {
+      "commitmentCount": 0,
+      "directions": [],
+      "dueDates": [],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-012",
+    "sourceType": "邮件",
+    "communicatedAt": "2026-05-25T02:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "我们会在 5 月 28 日 18:00 前给出灰度方案。请贵方 5 月 29 日前确认窗口。",
+    "expected": {
+      "commitmentCount": 2,
+      "directions": ["i_owe", "they_owe"],
+      "dueDates": ["2026-05-28", "2026-05-29"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-013",
+    "sourceType": "微信",
+    "communicatedAt": "2026-05-25T03:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "哈哈好的，端午后再说吧。",
+    "expected": {
+      "commitmentCount": 0,
+      "directions": [],
+      "dueDates": [],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-014",
+    "sourceType": "Slack",
+    "communicatedAt": "2026-05-25T04:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "Alice will send the English deck tomorrow. 我们周五前补中文截图。",
+    "expected": {
+      "commitmentCount": 2,
+      "directions": ["they_owe", "i_owe"],
+      "dueDates": ["2026-05-26", "2026-05-29"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-015",
+    "sourceType": "会议纪要",
+    "communicatedAt": "2026-05-25T05:30:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "客户说晚点给，但没有说给什么。我们确认下次会上再细化范围。",
+    "expected": {
+      "commitmentCount": 0,
+      "directions": [],
+      "dueDates": [],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-016",
+    "sourceType": "邮件",
+    "communicatedAt": "2026-05-26T01:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "按刚才电话，我方今天 16 点前提交报价单，你方明天中午前反馈审批意见。",
+    "expected": {
+      "commitmentCount": 2,
+      "directions": ["i_owe", "they_owe"],
+      "dueDates": ["2026-05-26", "2026-05-27"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-017",
+    "sourceType": "电话记录",
+    "communicatedAt": "2026-05-26T08:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "如果他们价格能降，我们可能下周签。现在先不承诺。",
+    "expected": {
+      "commitmentCount": 0,
+      "directions": [],
+      "dueDates": [],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-018",
+    "sourceType": "飞书",
+    "communicatedAt": "2026-05-27T02:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "我今天把 demo 链接放到群里，客户明天安排技术同事试用。",
+    "expected": {
+      "commitmentCount": 2,
+      "directions": ["i_owe", "they_owe"],
+      "dueDates": ["2026-05-27", "2026-05-28"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-019",
+    "sourceType": "邮件",
+    "communicatedAt": "2026-05-27T03:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "我们不会直接联系客户终端用户，后续只等你们内部消息。",
+    "expected": {
+      "commitmentCount": 0,
+      "directions": [],
+      "dueDates": [],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  },
+  {
+    "id": "zh-020",
+    "sourceType": "会议纪要",
+    "communicatedAt": "2026-05-28T06:00:00.000Z",
+    "timezone": "Asia/Shanghai",
+    "text": "下周一我们发上线 checklist。客户在 checklist 收到后两个工作日内确认。",
+    "expected": {
+      "commitmentCount": 1,
+      "directions": ["i_owe"],
+      "dueDates": ["2026-06-01"],
+      "metrics": ["漏提", "误提", "日期误判", "方向误判", "编辑率", "删除率"]
+    }
+  }
+]
