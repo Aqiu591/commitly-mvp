@@ -4,6 +4,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
+$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
 
 function Write-Check($Name, $Ok, $Detail = "") {
   $status = if ($Ok) { "OK" } else { "MISSING" }

@@ -20,9 +20,21 @@
 npm run dev
 npm run doctor
 npm run doctor:full
+npm run sync:github -- -Message "说明这次完成了什么"
 npm test
 npm run build
 ```
+
+## 每次完成进度后同步 GitHub
+
+1. 先运行 `npm run doctor`，确认代码健康。
+2. 再运行 `npm run sync:github -- -Message "本次进度说明"`。
+3. 如果是部署前或大改动，运行 `npm run sync:github -- -Full -Message "本次进度说明"`。
+4. 脚本会自动阻止 `.env.local`、`.next`、`node_modules`、`*.tsbuildinfo` 进入提交。
+
+## 后续对话框
+
+后续工作按 `docs/commitly-workstreams.md` 分成 5 个对话框推进：Supabase、OpenAI eval、Resend、Vercel、试用版打磨。
 
 ## 当前阻塞项
 

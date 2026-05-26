@@ -8,6 +8,7 @@
     "start": "next start",
     "doctor": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/commitly-doctor.ps1",
     "doctor:full": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/commitly-doctor.ps1 -Full",
+    "sync:github": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/commitly-sync-github.ps1",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
