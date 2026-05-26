@@ -21,6 +21,18 @@ export type DigestGroup = {
   noDueDate: DigestCommitment[];
 };
 
+export type DigestEmailMessage = {
+  userId: string;
+  email: {
+    from: string;
+    to: string;
+    subject: string;
+    html: string;
+  };
+};
+
+export const DAILY_DIGEST_SUBJECT = "Commitly 每日简报";
+
 export function groupCommitmentsForDigest(commitments: DigestCommitment[], today: string) {
   const groups = new Map<string, DigestGroup>();
 
@@ -58,6 +70,36 @@ export function groupCommitmentsForDigest(commitments: DigestCommitment[], today
   }
 
   return Array.from(groups.values());
+}
+
+export function buildDailyDigestMessages(
+  groups: DigestGroup[],
+  emailByUserId: Map<string, string | undefined>,
+  from: string
+) {
+  const messages: DigestEmailMessage[] = [];
+  let skipped = 0;
+
+  for (const group of groups) {
+    const to = emailByUserId.get(group.userId);
+
+    if (!to) {
+      skipped += 1;
+      continue;
+    }
+
+    messages.push({
+      userId: group.userId,
+      email: {
+        from,
+        to,
+        subject: DAILY_DIGEST_SUBJECT,
+        html: renderDailyDigestHtml(group)
+      }
+    });
+  }
+
+  return { messages, skipped };
 }
 
 export function renderDailyDigestHtml(group: DigestGroup) {

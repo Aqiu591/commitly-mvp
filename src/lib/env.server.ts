@@ -22,6 +22,6 @@ export const serverEnv = {
   supabaseAnonKey: () => requireServerEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
   supabaseServiceRoleKey: () => requireServerEnv("SUPABASE_SERVICE_ROLE_KEY"),
   resendApiKey: () => requireServerEnv("RESEND_API_KEY"),
-  dailyDigestFrom: optionalEnv("DAILY_DIGEST_FROM") ?? "Commitly <digest@example.com>",
+  dailyDigestFrom: () => requireServerEnv("DAILY_DIGEST_FROM"),
   cronSecret: () => requireServerEnv("CRON_SECRET")
 };

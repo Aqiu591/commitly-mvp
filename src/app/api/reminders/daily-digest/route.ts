@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-import { buildDashboardSections, formatDateInTimezone } from "@/lib/dashboard/sections";
+import { formatDateInTimezone } from "@/lib/dashboard/sections";
 import {
+  buildDailyDigestMessages,
   groupCommitmentsForDigest,
-  renderDailyDigestHtml,
   type DigestCommitment
 } from "@/lib/email/daily-digest";
 import { serverEnv } from "@/lib/env.server";
@@ -39,8 +39,6 @@ async function handleDailyDigest(request: NextRequest) {
   }
 
   const commitments = (data ?? []) as Commitment[];
-  buildDashboardSections(commitments, today);
-
   const groups = groupCommitmentsForDigest(commitments as DigestCommitment[], today);
 
   if (groups.length === 0) {
@@ -55,27 +53,25 @@ async function handleDailyDigest(request: NextRequest) {
 
   const emailByUserId = new Map(usersData.users.map((user) => [user.id, user.email]));
   const resend = new Resend(serverEnv.resendApiKey());
+  const { messages, skipped } = buildDailyDigestMessages(groups, emailByUserId, serverEnv.dailyDigestFrom());
   let sent = 0;
-  let skipped = 0;
 
-  for (const group of groups) {
-    const to = emailByUserId.get(group.userId);
+  for (const message of messages) {
+    const group = groups.find((digestGroup) => digestGroup.userId === message.userId);
 
-    if (!to) {
-      skipped += 1;
+    if (!group) {
       continue;
     }
 
-    await resend.emails.send({
-      from: serverEnv.dailyDigestFrom,
-      to,
-      subject: "Commitly 每日简报",
-      html: renderDailyDigestHtml(group)
-    });
+    const sendResult = await resend.emails.send(message.email);
+
+    if (sendResult.error) {
+      return jsonError("每日简报发送失败。", 502, sendResult.error.message);
+    }
 
     await supabase.from("reminders").insert({
       commitment_id: null,
-      user_id: group.userId,
+      user_id: message.userId,
       reminder_type: "daily_digest",
       scheduled_for: today,
       sent_at: new Date().toISOString(),
