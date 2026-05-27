@@ -9,7 +9,7 @@ type SetupChecklistProps = {
 
 export function SetupChecklist({
   title = "还差几项配置",
-  description = "代码已经能跑，下一步是把真实服务接上。这里不会显示任何密钥值，只显示变量名是否存在。"
+  description = "代码已经能跑，下一步是把真实服务接上。这里不会显示任何密钥值，只显示变量名是否存在。补齐后请重启本地服务。"
 }: SetupChecklistProps) {
   const groups = getEnvRows(process.env);
 
@@ -48,9 +48,14 @@ export function SetupChecklist({
       <section className="setup-next">
         <h2>建议顺序</h2>
         <ol>
-          <li>先配置 Supabase，并执行 `supabase/migrations/001_init.sql`。</li>
-          <li>再配置 Resend 发件邮箱和每日简报。</li>
-          <li>最后配置 Vercel 环境变量和 Cron。</li>
+          <li>
+            复制 <code>.env.example</code> 的变量名到 <code>.env.local</code>，只在本机填写真实值。
+          </li>
+          <li>
+            先配置 Supabase，并执行 <code>supabase/migrations/001_init.sql</code>。
+          </li>
+          <li>再配置 OpenAI，让导入页可以提取承诺。</li>
+          <li>最后配置 Resend、发件邮箱和 Vercel Cron，用于每日简报。</li>
         </ol>
       </section>
     </main>

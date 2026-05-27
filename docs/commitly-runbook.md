@@ -9,10 +9,27 @@
 ## 本地联调顺序
 
 1. Supabase：执行 `supabase/migrations/001_init.sql`，补齐 Supabase 环境变量。
-2. OpenAI：确认 `.env.local` 里有 `OPENAI_API_KEY`。
-3. Resend：补齐 `RESEND_API_KEY` 和 `DAILY_DIGEST_FROM`。
-4. 本地完整流程：登录 -> 导入 -> AI 分析 -> 审核 -> 看板。
-5. 部署前执行 `npm run doctor:full`。
+2. OpenAI：确认 `.env.local` 里有 `OPENAI_API_KEY`，导入页才能分析文本。
+3. Resend：补齐 `RESEND_API_KEY` 和 `DAILY_DIGEST_FROM`，每日简报才能发送。
+4. Cron：补齐 `CRON_SECRET`，本地手动触发和 Vercel Cron 都要带 Bearer token。
+5. 本地完整流程：登录 -> 导入 -> AI 分析 -> 审核 -> 看板。
+6. 部署前执行 `npm run doctor:full`。
+
+## 普通试用者怎么走
+
+1. 先打开 `/setup`，只看哪些变量名缺失，不会看到密钥值。
+2. 配好 Supabase 后去 `/login`，输入邮箱收登录链接。
+3. 去 `/import` 粘贴一段沟通文本。这里不会自动连接 Gmail、微信、Slack 或飞书。
+4. 进入 `/review/...` 后，按“删除误提 -> 改方向/责任人/日期 -> 保存到看板”的顺序审核。
+5. 在 `/dashboard` 每天先处理“已逾期”和“今日到期”，再处理未来跟进。
+
+## 常见提示怎么处理
+
+- `缺少 OPENAI_API_KEY`：补齐 OpenAI 配置，重启本地服务，再重新导入。
+- `请先登录`：登录态过期，回到 `/login` 重新收 magic link。
+- `AI 分析超时`：先缩短原文，或稍后重试。
+- `每日简报发送失败`：检查 Resend 发件域名是否验证、API Key 是否有效、收件邮箱是否存在。
+- `缺少 CRON_SECRET`：补齐 Cron 配置后再触发每日简报接口。
 
 ## 常用命令
 
@@ -35,9 +52,3 @@ npm run build
 ## 后续对话框
 
 后续工作按 `docs/commitly-workstreams.md` 分成 5 个对话框推进：Supabase、OpenAI eval、Resend、Vercel、试用版打磨。
-
-## 当前阻塞项
-
-- `.env.local` 目前只确认有 `OPENAI_API_KEY` 这个变量名。
-- Supabase、Resend、Vercel 的真实项目配置还需要补齐。
-- Git 还没有提交第一个版本。

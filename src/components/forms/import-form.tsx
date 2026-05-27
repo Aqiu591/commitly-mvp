@@ -1,10 +1,12 @@
 "use client";
 
-import { ClipboardPaste, LoaderCircle } from "lucide-react";
+import { ClipboardPaste, LoaderCircle, Sparkles } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const sourceTypes = ["会议纪要", "邮件", "微信", "Slack", "飞书", "电话记录", "其他"];
+import { formatImportFailureMessage } from "@/lib/user-facing";
+
+const sourceTypes = ["会议纪要", "邮件文本", "聊天记录", "电话摘要", "其他"];
 
 export function ImportForm() {
   const router = useRouter();
@@ -14,6 +16,7 @@ export function ImportForm() {
   );
   const [timezone, setTimezone] = useState(browserTimezone);
   const [error, setError] = useState("");
+  const [rawText, setRawText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -33,28 +36,42 @@ export function ImportForm() {
       rawText: String(formData.get("rawText") ?? "")
     };
 
-    const response = await fetch("/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-    const result = await response.json().catch(() => null);
-    setIsSubmitting(false);
+      const result = await response.json().catch(() => null);
 
-    if (!response.ok) {
-      setError(result?.error ?? "导入失败");
-      return;
+      if (!response.ok) {
+        setError(formatImportFailureMessage(response.status, result?.error));
+        return;
+      }
+
+      if (!result?.reviewUrl) {
+        setError("分析完成了，但没有拿到审核入口。请刷新看板后再试。");
+        return;
+      }
+
+      router.push(result.reviewUrl);
+    } catch {
+      setError("无法连接到 Commitly 服务。请确认本地服务还在运行，网络正常后再试。");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    router.push(result.reviewUrl);
   }
 
   return (
     <form className="import-grid" onSubmit={handleSubmit}>
-      <section className="form-panel">
+      <section className="form-panel import-details-panel">
+        <div className="panel-kicker">
+          <Sparkles size={17} />
+          <span>AI 会先提取草稿，最终仍由你确认。</span>
+        </div>
         <label>
-          来源
+          文本来源
           <select name="sourceType" required defaultValue="会议纪要">
             {sourceTypes.map((sourceType) => (
               <option key={sourceType} value={sourceType}>
@@ -66,6 +83,7 @@ export function ImportForm() {
         <label>
           客户 / 公司
           <input name="customerName" required placeholder="例如：Acme China" />
+          <span className="form-hint">用于看板识别上下文，不会创建联系人表。</span>
         </label>
         <label>
           联系人
@@ -76,7 +94,7 @@ export function ImportForm() {
           <input name="projectName" placeholder="例如：Q3 续约" />
         </label>
         <label>
-          沟通时间
+          沟通发生时间
           <input name="communicatedAt" required type="datetime-local" defaultValue={defaultDateTimeLocal()} />
         </label>
         <label>
@@ -86,19 +104,22 @@ export function ImportForm() {
       </section>
       <section className="form-panel text-panel">
         <label>
-          原文
+          沟通原文
           <textarea
             name="rawText"
             required
             rows={18}
-            placeholder="粘贴会议纪要、邮件、聊天记录或电话摘要..."
+            value={rawText}
+            onChange={(event) => setRawText(event.target.value)}
+            placeholder="粘贴会议纪要、邮件、聊天记录或电话摘要。尽量保留谁答应了什么、给谁、什么时候完成。"
           />
+          <span className="form-hint">{rawText.trim().length} 字。3 字以上即可分析，越完整越容易提取准确。</span>
         </label>
         <div className="form-actions">
           {error ? <p className="error-text">{error}</p> : <span />}
           <button className="primary-button" disabled={isSubmitting} type="submit">
             {isSubmitting ? <LoaderCircle className="spin" size={18} /> : <ClipboardPaste size={18} />}
-            {isSubmitting ? "分析中" : "分析并进入审核"}
+            {isSubmitting ? "分析中" : "开始分析"}
           </button>
         </div>
       </section>

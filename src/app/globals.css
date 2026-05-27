@@ -1,7 +1,7 @@
 :root {
-  --bg: #f6f4ef;
+  --bg: #f3f6f8;
   --surface: #ffffff;
-  --surface-strong: #f8fafc;
+  --surface-strong: #eef3f6;
   --ink: #1d252d;
   --muted: #64727f;
   --line: #d8dee4;
@@ -61,7 +61,7 @@ button:disabled {
   min-height: 64px;
   padding: 0 28px;
   border-bottom: 1px solid var(--line);
-  background: rgba(246, 244, 239, 0.92);
+  background: rgba(243, 246, 248, 0.92);
   backdrop-filter: blur(16px);
 }
 
@@ -97,6 +97,13 @@ button:disabled {
   margin: 4px 0 0;
   font-size: clamp(2rem, 4vw, 3.4rem);
   line-height: 1;
+}
+
+.heading-note {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
 }
 
 .eyebrow {
@@ -231,8 +238,32 @@ textarea:focus {
   padding: 20px;
 }
 
+.import-details-panel {
+  gap: 18px;
+}
+
 .text-panel {
   min-height: 560px;
+}
+
+.panel-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(30, 107, 92, 0.18);
+  border-radius: 8px;
+  background: #eef8f4;
+  color: var(--primary-dark);
+  padding: 11px 12px;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.form-hint {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.45;
 }
 
 .form-actions,
@@ -269,6 +300,11 @@ textarea:focus {
   display: grid;
   gap: 18px;
   padding: 20px;
+}
+
+.source-panel h2 {
+  margin: 4px 0 0;
+  font-size: 1.08rem;
 }
 
 .source-meta {
@@ -326,6 +362,48 @@ dd {
   font-weight: 800;
 }
 
+.review-tips {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.review-tips strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.review-tips ol {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.raw-text-box {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  padding: 12px;
+}
+
+.raw-text-box summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.raw-text-box p {
+  max-height: 260px;
+  margin: 10px 0 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: var(--ink);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
 .two-column {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -356,6 +434,13 @@ dd {
   margin: 0;
 }
 
+.empty-state p {
+  max-width: 420px;
+  margin: 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -368,12 +453,18 @@ dd {
   align-items: center;
   justify-content: space-between;
   padding: 22px;
-  background: #fbf7ec;
+  background: #eef8f4;
 }
 
 .digest-card h2,
 .board-column h2 {
   margin: 0;
+}
+
+.digest-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .digest-metrics {
@@ -415,6 +506,13 @@ dd {
   margin-bottom: 12px;
 }
 
+.board-column header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .board-column header span {
   display: inline-grid;
   min-width: 26px;
@@ -454,12 +552,38 @@ dd {
   line-height: 1.45;
 }
 
+.follow-up-line {
+  color: var(--primary) !important;
+  font-weight: 800;
+}
+
 .commitment-card dl {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
   font-size: 0.82rem;
+}
+
+.dashboard-empty {
+  grid-column: span 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 20px;
+}
+
+.dashboard-empty h2,
+.dashboard-empty p {
+  margin: 0;
+}
+
+.dashboard-empty p {
+  color: var(--muted);
 }
 
 .setup-shell {
@@ -516,7 +640,8 @@ dd {
   padding-top: 8px;
 }
 
-.setup-group code {
+.setup-group code,
+.setup-next code {
   overflow-wrap: anywhere;
   color: var(--ink);
   font-size: 0.82rem;
@@ -574,6 +699,10 @@ dd {
     grid-column: span 1;
   }
 
+  .dashboard-empty {
+    grid-column: span 1;
+  }
+
   .source-panel {
     position: static;
   }
@@ -590,10 +719,17 @@ dd {
 
   .page-heading,
   .digest-card,
+  .dashboard-empty,
   .form-actions,
   .sticky-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .primary-button,
+  .primary-link,
+  .secondary-button {
+    width: 100%;
   }
 
   .two-column,

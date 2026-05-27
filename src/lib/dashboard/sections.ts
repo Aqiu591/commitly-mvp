@@ -12,12 +12,13 @@ export type DashboardSections = {
 export function buildDashboardSections(commitments: Commitment[], today: string): DashboardSections {
   const visible = commitments.filter((commitment) => commitment.status !== "deleted");
   const active = visible.filter((commitment) => commitment.status === "confirmed");
+  const future = active.filter((commitment) => Boolean(commitment.due_date && commitment.due_date > today));
 
   return {
     today: active.filter((commitment) => commitment.due_date === today),
     overdue: active.filter((commitment) => Boolean(commitment.due_date && commitment.due_date < today)),
-    iOwe: active.filter((commitment) => commitment.direction === "i_owe"),
-    theyOwe: active.filter((commitment) => commitment.direction === "they_owe"),
+    iOwe: future.filter((commitment) => commitment.direction === "i_owe"),
+    theyOwe: future.filter((commitment) => commitment.direction === "they_owe"),
     noDueDate: active.filter((commitment) => !commitment.due_date),
     done: visible.filter((commitment) => commitment.status === "done")
   };

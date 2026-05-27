@@ -89,8 +89,17 @@ describe("Commitly core flow", () => {
     const sections = buildDashboardSections(confirmed, "2026-05-25");
 
     expect(sections.today).toHaveLength(1);
-    expect(sections.iOwe).toHaveLength(1);
+    expect(sections.iOwe).toHaveLength(0);
     expect(sections.theyOwe).toHaveLength(1);
+    expect(
+      [
+        ...sections.today,
+        ...sections.overdue,
+        ...sections.iOwe,
+        ...sections.theyOwe,
+        ...sections.noDueDate
+      ].map((commitment) => commitment.id)
+    ).toEqual(["commitment-0", "commitment-1"]);
   });
 
   it("keeps daily digest data scoped per user", () => {

@@ -8,9 +8,16 @@ function optionalEnv(name: string) {
 export function requireServerEnv(name: string) {
   const value = optionalEnv(name);
   if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
+    throw new MissingEnvError(name);
   }
   return value;
+}
+
+export class MissingEnvError extends Error {
+  constructor(readonly envName: string) {
+    super(`Missing required environment variable: ${envName}`);
+    this.name = "MissingEnvError";
+  }
 }
 
 export const serverEnv = {

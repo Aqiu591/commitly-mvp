@@ -6,6 +6,7 @@ import { mapAiCommitmentsToDraftRows } from "@/lib/commitments/map-ai";
 import { serverEnv } from "@/lib/env.server";
 import { jsonError, validationError } from "@/lib/http";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { formatMissingConfigMessage, missingEnvNameFromError } from "@/lib/user-facing";
 import { analyzeRequestSchema } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -82,15 +83,28 @@ export async function POST(request: NextRequest) {
       warnings: extraction.warnings
     });
   } catch (error) {
+    const missingEnvName = missingEnvNameFromError(error);
+
     await supabase
       .from("source_texts")
       .update({
         analysis_status: "failed",
         ai_model: serverEnv.openaiAnalysisModel,
-        ai_error: error instanceof Error ? error.message : "未知 AI 错误"
+        ai_error: missingEnvName
+          ? formatMissingConfigMessage(missingEnvName, "ai")
+          : error instanceof Error
+            ? error.message
+            : "未知 AI 错误"
       })
       .eq("id", sourceText.id)
       .eq("user_id", user.id);
+
+    if (missingEnvName) {
+      return jsonError(formatMissingConfigMessage(missingEnvName, "ai"), 503, {
+        sourceTextId: sourceText.id,
+        missing: missingEnvName
+      });
+    }
 
     if (error instanceof AiRefusalError) {
       return jsonError("模型拒绝分析这段文本。", 422, { sourceTextId: sourceText.id });

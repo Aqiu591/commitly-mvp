@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Circle, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import type { DashboardSections } from "@/lib/dashboard/sections";
 import type { Commitment } from "@/lib/types";
@@ -15,26 +15,29 @@ type DashboardBoardProps = {
 const sectionOrder: Array<{
   key: keyof DashboardSections;
   title: string;
+  description: string;
   tone: "neutral" | "urgent" | "done";
 }> = [
-  { key: "today", title: "今日", tone: "neutral" },
-  { key: "overdue", title: "逾期", tone: "urgent" },
-  { key: "iOwe", title: "我欠别人", tone: "neutral" },
-  { key: "theyOwe", title: "别人欠我", tone: "neutral" },
-  { key: "noDueDate", title: "无明确日期", tone: "neutral" },
-  { key: "done", title: "已完成", tone: "done" }
+  { key: "today", title: "今日到期", description: "今天必须处理", tone: "neutral" },
+  { key: "overdue", title: "已逾期", description: "先补救这些", tone: "urgent" },
+  { key: "iOwe", title: "我方后续", description: "未来要交付", tone: "neutral" },
+  { key: "theyOwe", title: "对方后续", description: "未来要跟进", tone: "neutral" },
+  { key: "noDueDate", title: "待定日期", description: "需要补日期", tone: "neutral" },
+  { key: "done", title: "已完成", description: "可恢复追踪", tone: "done" }
 ];
 
 export function DashboardBoard({ sections, today }: DashboardBoardProps) {
   const digestCount =
     sections.today.length + sections.overdue.length + sections.noDueDate.length + sections.iOwe.length + sections.theyOwe.length;
+  const emptyBoard = digestCount === 0 && sections.done.length === 0;
 
   return (
     <div className="dashboard-grid">
       <section className="digest-card">
         <div>
           <p className="eyebrow">每日简报</p>
-          <h2>每日简报</h2>
+          <h2>今天先看 {digestCount} 件事</h2>
+          <p>看板按优先级分组，同一条承诺只会出现在一个待办栏里。</p>
         </div>
         <div className="digest-metrics">
           <span>
@@ -42,16 +45,33 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
             <small>今日日期</small>
           </span>
           <span>
-            <strong>{digestCount}</strong>
-            <small>待关注项</small>
+            <strong>{sections.overdue.length}</strong>
+            <small>逾期</small>
+          </span>
+          <span>
+            <strong>{sections.noDueDate.length}</strong>
+            <small>待补日期</small>
           </span>
         </div>
       </section>
 
+      {emptyBoard ? (
+        <section className="dashboard-empty">
+          <h2>还没有承诺</h2>
+          <p>先导入一段会议纪要、邮件文本或聊天记录，审核后就会出现在这里。</p>
+          <a className="primary-link" href="/import">
+            去导入
+          </a>
+        </section>
+      ) : null}
+
       {sectionOrder.map((section) => (
         <section className={`board-column ${section.tone}`} key={section.key}>
           <header>
-            <h2>{section.title}</h2>
+            <div>
+              <h2>{section.title}</h2>
+              <p>{section.description}</p>
+            </div>
             <span>{sections[section.key].length}</span>
           </header>
           <div className="card-stack">
@@ -72,18 +92,31 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
 function CommitmentCard({ commitment }: { commitment: Commitment }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState("");
   const isDone = commitment.status === "done";
 
   async function setStatus(status: "confirmed" | "done") {
-    await fetch(`/api/commitments/${commitment.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status })
-    });
+    setError("");
 
-    startTransition(() => {
-      router.refresh();
-    });
+    try {
+      const response = await fetch(`/api/commitments/${commitment.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        setError(result?.error ?? "更新失败，请稍后再试。");
+        return;
+      }
+
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch {
+      setError("无法连接到 Commitly 服务，请稍后再试。");
+    }
   }
 
   return (
@@ -96,7 +129,7 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
       <dl>
         <div>
           <dt>方向</dt>
-          <dd>{commitment.direction === "i_owe" ? "我欠别人" : "别人欠我"}</dd>
+          <dd>{commitment.direction === "i_owe" ? "我方交付" : "对方交付"}</dd>
         </div>
         <div>
           <dt>负责人</dt>
@@ -107,6 +140,10 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
           <dd>{commitment.due_date || "未定"}</dd>
         </div>
       </dl>
+      {commitment.suggested_follow_up_date ? (
+        <p className="follow-up-line">建议跟进：{commitment.suggested_follow_up_date}</p>
+      ) : null}
+      {error ? <p className="error-text">{error}</p> : null}
       <button
         className="secondary-button compact"
         disabled={isPending}

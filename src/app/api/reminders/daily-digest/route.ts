@@ -11,6 +11,7 @@ import { serverEnv } from "@/lib/env.server";
 import { jsonError } from "@/lib/http";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { Commitment } from "@/lib/types";
+import { formatMissingConfigMessage, missingEnvNameFromError } from "@/lib/user-facing";
 
 export const runtime = "nodejs";
 
@@ -23,7 +24,13 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleDailyDigest(request: NextRequest) {
-  if (request.headers.get("authorization") !== `Bearer ${serverEnv.cronSecret()}`) {
+  const cronSecret = readRequiredConfig(() => serverEnv.cronSecret(), "CRON_SECRET", "cron");
+
+  if ("response" in cronSecret) {
+    return cronSecret.response;
+  }
+
+  if (request.headers.get("authorization") !== `Bearer ${cronSecret.value}`) {
     return jsonError("无权限访问。", 401);
   }
 
@@ -52,8 +59,19 @@ async function handleDailyDigest(request: NextRequest) {
   }
 
   const emailByUserId = new Map(usersData.users.map((user) => [user.id, user.email]));
-  const resend = new Resend(serverEnv.resendApiKey());
-  const { messages, skipped } = buildDailyDigestMessages(groups, emailByUserId, serverEnv.dailyDigestFrom());
+  const resendApiKey = readRequiredConfig(() => serverEnv.resendApiKey(), "RESEND_API_KEY", "email");
+  const dailyDigestFrom = readRequiredConfig(() => serverEnv.dailyDigestFrom(), "DAILY_DIGEST_FROM", "email");
+
+  if ("response" in resendApiKey) {
+    return resendApiKey.response;
+  }
+
+  if ("response" in dailyDigestFrom) {
+    return dailyDigestFrom.response;
+  }
+
+  const resend = new Resend(resendApiKey.value);
+  const { messages, skipped } = buildDailyDigestMessages(groups, emailByUserId, dailyDigestFrom.value);
   let sent = 0;
 
   for (const message of messages) {
@@ -66,7 +84,7 @@ async function handleDailyDigest(request: NextRequest) {
     const sendResult = await resend.emails.send(message.email);
 
     if (sendResult.error) {
-      return jsonError("每日简报发送失败。", 502, sendResult.error.message);
+      return jsonError("每日简报发送失败。请检查 Resend 发件域名、API Key 和收件人邮箱。", 502, sendResult.error.message);
     }
 
     await supabase.from("reminders").insert({
@@ -88,4 +106,24 @@ async function handleDailyDigest(request: NextRequest) {
   }
 
   return NextResponse.json({ sent, skipped });
+}
+
+function readRequiredConfig(
+  read: () => string,
+  fallbackName: string,
+  context: "cron" | "email"
+):
+  | { value: string }
+  | {
+      response: NextResponse;
+    } {
+  try {
+    return { value: read() };
+  } catch (error) {
+    const missing = missingEnvNameFromError(error) ?? fallbackName;
+
+    return {
+      response: jsonError(formatMissingConfigMessage(missing, context), 500, { missing })
+    };
+  }
 }

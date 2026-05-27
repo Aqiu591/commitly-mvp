@@ -11,16 +11,25 @@ const mocks = vi.hoisted(() => ({
   sendResponse: { data: { id: "email-1" }, error: null } as {
     data: { id: string } | null;
     error: { message: string } | null;
-  }
+  },
+  missingEnvName: "" as "" | "CRON_SECRET" | "RESEND_API_KEY" | "DAILY_DIGEST_FROM"
 }));
 
 vi.mock("@/lib/env.server", () => ({
   serverEnv: {
-    cronSecret: () => "test-cron-secret",
-    dailyDigestFrom: () => "Commitly <digest@example.com>",
-    resendApiKey: () => "test-resend-key"
+    cronSecret: () => readMockEnv("CRON_SECRET", "test-cron-secret"),
+    dailyDigestFrom: () => readMockEnv("DAILY_DIGEST_FROM", "Commitly <digest@example.com>"),
+    resendApiKey: () => readMockEnv("RESEND_API_KEY", "test-resend-key")
   }
 }));
+
+function readMockEnv(name: typeof mocks.missingEnvName, value: string) {
+  if (mocks.missingEnvName === name) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+
+  return value;
+}
 
 vi.mock("@/lib/supabase/admin", () => ({
   createSupabaseAdminClient: () => ({
@@ -74,6 +83,7 @@ describe("daily digest route", () => {
     mocks.reminderRows = [];
     mocks.sentEmails = [];
     mocks.sendResponse = { data: { id: "email-1" }, error: null };
+    mocks.missingEnvName = "";
   });
 
   afterEach(() => {
@@ -92,11 +102,27 @@ describe("daily digest route", () => {
 
     expect(response.status).toBe(502);
     expect(await response.json()).toMatchObject({
-      error: "每日简报发送失败。",
+      error: "每日简报发送失败。请检查 Resend 发件域名、API Key 和收件人邮箱。",
       details: "Domain not verified"
     });
     expect(mocks.sentEmails).toHaveLength(1);
     expect(mocks.reminderRows).toHaveLength(0);
+  });
+
+  it("returns a clear setup error when cron config is missing", async () => {
+    mocks.missingEnvName = "CRON_SECRET";
+
+    const response = await POST(
+      new NextRequest("http://localhost/api/reminders/daily-digest", {
+        method: "POST"
+      })
+    );
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toMatchObject({
+      error: "缺少 CRON_SECRET，定时任务暂时不能验证请求。请补齐配置后重试。",
+      details: { missing: "CRON_SECRET" }
+    });
   });
 });
 
