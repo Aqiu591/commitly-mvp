@@ -10,6 +10,7 @@ import { parseStructuredResponse } from "@/lib/ai/response-parser";
 
 import samples from "./zh-commitment-samples.json";
 import { normalizeExpectedEval, scoreCommitmentExtraction, summarizeEvalScores } from "./scoring";
+import { selectEvalSamples } from "./selection";
 
 const shouldRunLiveEval = process.env.RUN_OPENAI_EVAL === "1";
 
@@ -28,10 +29,14 @@ describe.skipIf(!shouldRunLiveEval)("OpenAI live Chinese extraction eval", () =>
         timeout: 45000,
         maxRetries: 1
       });
+      const selectedSamples = selectEvalSamples(samples, {
+        sampleIds: process.env.OPENAI_EVAL_SAMPLE_IDS,
+        limit: process.env.OPENAI_EVAL_LIMIT
+      });
 
       const scores = [];
 
-      for (const sample of samples) {
+      for (const sample of selectedSamples) {
         const response = await client.responses.create({
           model,
           instructions: COMMITMENT_EXTRACTION_PROMPT,
@@ -62,10 +67,21 @@ describe.skipIf(!shouldRunLiveEval)("OpenAI live Chinese extraction eval", () =>
       }
 
       const summary = summarizeEvalScores(scores);
-      console.info(JSON.stringify({ model, summary, scores }, null, 2));
+      console.info(
+        JSON.stringify(
+          {
+            model,
+            selectedSampleIds: selectedSamples.map((sample) => sample.id),
+            summary,
+            scores
+          },
+          null,
+          2
+        )
+      );
 
-      expect(scores).toHaveLength(20);
-      expect(summary.sampleCount).toBe(20);
+      expect(scores).toHaveLength(selectedSamples.length);
+      expect(summary.sampleCount).toBe(selectedSamples.length);
     },
     300000
   );

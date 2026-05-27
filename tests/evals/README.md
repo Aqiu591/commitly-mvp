@@ -8,7 +8,15 @@
 npm run eval:openai
 ```
 
-`eval:openai` 会跑完 20 条匿名中文样例并输出聚合分数；脚本不会读取 `.env.local`，也不会打印 `OPENAI_API_KEY`。
+额度紧张时优先只跑 1 条或少量样例：
+
+```powershell
+npm run eval:openai -- -SampleId zh-016
+npm run eval:openai -- -SampleId zh-016,zh-018
+npm run eval:openai -- -Limit 3
+```
+
+`eval:openai` 默认会跑完 20 条匿名中文样例并输出聚合分数；使用 `-SampleId` 或 `-Limit` 可以控制真实 OpenAI 调用次数。脚本不会读取 `.env.local`，也不会打印 `OPENAI_API_KEY`。
 
 每次跑模型后，用下面 6 个指标给 20 条匿名中文样例打分：
 
