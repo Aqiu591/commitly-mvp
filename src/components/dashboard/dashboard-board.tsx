@@ -16,14 +16,15 @@ const sectionOrder: Array<{
   key: keyof DashboardSections;
   title: string;
   description: string;
+  emptyMessage: string;
   tone: "neutral" | "urgent" | "done";
 }> = [
-  { key: "today", title: "今日到期", description: "今天必须处理", tone: "neutral" },
-  { key: "overdue", title: "已逾期", description: "先补救这些", tone: "urgent" },
-  { key: "iOwe", title: "我方后续", description: "未来要交付", tone: "neutral" },
-  { key: "theyOwe", title: "对方后续", description: "未来要跟进", tone: "neutral" },
-  { key: "noDueDate", title: "待定日期", description: "需要补日期", tone: "neutral" },
-  { key: "done", title: "已完成", description: "可恢复追踪", tone: "done" }
+  { key: "today", title: "今日到期", description: "今天需要完成或跟进", emptyMessage: "今天没有到期承诺", tone: "neutral" },
+  { key: "overdue", title: "已逾期", description: "优先补救这些事项", emptyMessage: "没有逾期承诺", tone: "urgent" },
+  { key: "iOwe", title: "我欠别人", description: "我方未来要交付", emptyMessage: "没有未来要交付的承诺", tone: "neutral" },
+  { key: "theyOwe", title: "别人欠我", description: "对方未来要交付", emptyMessage: "没有需要对方交付的承诺", tone: "neutral" },
+  { key: "noDueDate", title: "无明确日期", description: "需要补充日期或跟进", emptyMessage: "没有待补日期的承诺", tone: "neutral" },
+  { key: "done", title: "已完成", description: "已归档，可恢复追踪", emptyMessage: "还没有已完成承诺", tone: "done" }
 ];
 
 export function DashboardBoard({ sections, today }: DashboardBoardProps) {
@@ -35,9 +36,9 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
     <div className="dashboard-grid">
       <section className="digest-card">
         <div>
-          <p className="eyebrow">每日简报</p>
-          <h2>今天先看 {digestCount} 件事</h2>
-          <p>看板按优先级分组，同一条承诺只会出现在一个待办栏里。</p>
+          <p className="eyebrow">今日工作台</p>
+          <h2>{sections.today.length === 0 ? "今天没有到期承诺" : `今天到期 ${sections.today.length} 件`}</h2>
+          <p>看板按今日、逾期、责任方向、无明确日期和已完成分组，同一条承诺只会出现一次。</p>
         </div>
         <div className="digest-metrics">
           <span>
@@ -49,8 +50,12 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
             <small>逾期</small>
           </span>
           <span>
+            <strong>{digestCount}</strong>
+            <small>待处理</small>
+          </span>
+          <span>
             <strong>{sections.noDueDate.length}</strong>
-            <small>待补日期</small>
+            <small>无明确日期</small>
           </span>
         </div>
       </section>
@@ -76,7 +81,7 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
           </header>
           <div className="card-stack">
             {sections[section.key].length === 0 ? (
-              <p className="muted-text">暂无</p>
+              <p className="empty-column-state">{section.emptyMessage}</p>
             ) : (
               sections[section.key].map((commitment) => (
                 <CommitmentCard commitment={commitment} key={`${section.key}-${commitment.id}`} />
@@ -123,21 +128,27 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
     <article className="commitment-card">
       <div className="card-title-row">
         {isDone ? <CheckCircle2 size={18} /> : <Circle size={18} />}
-        <h3>{commitment.title}</h3>
+        <div>
+          <span className={`direction-pill ${commitment.direction}`}>{formatDirection(commitment.direction)}</span>
+          <h3>{commitment.title}</h3>
+        </div>
       </div>
       <p>{commitment.details || commitment.evidence}</p>
+      <p className="route-line">
+        {commitment.owner_label} 给 {commitment.counterparty_label}
+      </p>
       <dl>
-        <div>
-          <dt>方向</dt>
-          <dd>{commitment.direction === "i_owe" ? "我方交付" : "对方交付"}</dd>
-        </div>
         <div>
           <dt>负责人</dt>
           <dd>{commitment.owner_label}</dd>
         </div>
         <div>
           <dt>截止</dt>
-          <dd>{commitment.due_date || "未定"}</dd>
+          <dd>{formatDue(commitment)}</dd>
+        </div>
+        <div>
+          <dt>置信度</dt>
+          <dd>{Math.round(commitment.confidence * 100)}%</dd>
         </div>
       </dl>
       {commitment.suggested_follow_up_date ? (
@@ -145,7 +156,7 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
       ) : null}
       {error ? <p className="error-text">{error}</p> : null}
       <button
-        className="secondary-button compact"
+        className="secondary-button compact card-action"
         disabled={isPending}
         onClick={() => setStatus(isDone ? "confirmed" : "done")}
         type="button"
@@ -155,4 +166,16 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
       </button>
     </article>
   );
+}
+
+function formatDirection(direction: Commitment["direction"]) {
+  return direction === "i_owe" ? "我欠别人" : "别人欠我";
+}
+
+function formatDue(commitment: Commitment) {
+  if (!commitment.due_date) {
+    return "无明确日期";
+  }
+
+  return commitment.due_time ? `${commitment.due_date} ${commitment.due_time.slice(0, 5)}` : commitment.due_date;
 }

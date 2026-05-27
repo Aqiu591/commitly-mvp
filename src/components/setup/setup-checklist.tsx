@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 
 import { getEnvRows } from "@/lib/setup-status";
 
@@ -12,6 +13,10 @@ export function SetupChecklist({
   description = "代码已经能跑，下一步是把真实服务接上。这里不会显示任何密钥值，只显示变量名是否存在。补齐后请重启本地服务。"
 }: SetupChecklistProps) {
   const groups = getEnvRows(process.env);
+  const rows = groups.flatMap((group) => group.rows);
+  const requiredRows = rows.filter((row) => row.required);
+  const missingRequiredRows = requiredRows.filter((row) => !row.configured);
+  const configuredRequiredCount = requiredRows.length - missingRequiredRows.length;
 
   return (
     <main className="page-shell setup-shell">
@@ -25,6 +30,32 @@ export function SetupChecklist({
         </Link>
       </section>
       <p className="setup-intro">{description}</p>
+      <section className={`setup-summary ${missingRequiredRows.length > 0 ? "needs-action" : "ready"}`}>
+        <div>
+          <p className="eyebrow">环境状态</p>
+          <h2>{missingRequiredRows.length > 0 ? `还有 ${missingRequiredRows.length} 项关键配置缺失` : "关键配置已齐"}</h2>
+          <p>这里只显示配置项是否存在，不显示也不读取任何密钥值。</p>
+        </div>
+        <div className="setup-progress">
+          {missingRequiredRows.length > 0 ? <AlertTriangle size={22} /> : <CheckCircle2 size={22} />}
+          <strong>
+            {configuredRequiredCount}/{requiredRows.length}
+          </strong>
+          <span>关键配置</span>
+        </div>
+      </section>
+      {missingRequiredRows.length > 0 ? (
+        <section className="setup-missing-list" aria-label="缺失配置">
+          <strong>下一步先补：</strong>
+          <ul>
+            {missingRequiredRows.map((row) => (
+              <li key={row.name}>
+                <code>{row.name}</code>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <div className="setup-grid">
         {groups.map((group) => (
           <section className="setup-group" key={group.title}>
@@ -34,8 +65,11 @@ export function SetupChecklist({
             </div>
             <ul>
               {group.rows.map((row) => (
-                <li key={row.name}>
-                  <code>{row.name}</code>
+                <li className={row.configured ? "configured" : "missing"} key={row.name}>
+                  <span>
+                    <code>{row.name}</code>
+                    <small>{row.required ? "关键配置" : "可选配置"}</small>
+                  </span>
                   <span className={row.configured ? "status-ok" : "status-missing"}>
                     {row.configured ? "已配置" : row.required ? "缺少" : "可选"}
                   </span>
@@ -56,6 +90,7 @@ export function SetupChecklist({
           </li>
           <li>再配置 OpenAI，让导入页可以提取承诺。</li>
           <li>最后配置 Resend、发件邮箱和 Vercel Cron，用于每日简报。</li>
+          <li>补齐后重启本地服务，再回到登录页。</li>
         </ol>
       </section>
     </main>

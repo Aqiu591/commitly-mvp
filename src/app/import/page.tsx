@@ -20,8 +20,10 @@ export default async function ImportPage() {
       <section className="page-heading">
         <div>
           <p className="eyebrow">导入</p>
-          <h1>粘贴一段客户沟通</h1>
-          <p className="heading-note">只处理你粘贴的文本，不连接邮箱、微信、Slack 或飞书账号。</p>
+          <h1>导入沟通文本</h1>
+          <p className="heading-note">
+            粘贴一段中文沟通记录，让 AI 先提取候选承诺。Commitly 只处理你粘贴的文本，不连接外部账号。
+          </p>
         </div>
       </section>
       <ImportForm />

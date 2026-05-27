@@ -27,14 +27,27 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="auth-page">
-      <section className="auth-panel">
-        <div>
+      <div className="auth-layout">
+        <section className="auth-panel">
+          <div>
+            <p className="eyebrow">Commitly</p>
+            <h1>登录到承诺看板</h1>
+            <p className="heading-note">用邮箱登录后，继续导入沟通文本、审核 AI 草稿和查看每日承诺。</p>
+          </div>
+          {authError ? <p className="error-text auth-error">{formatAuthCallbackMessage(authError)}</p> : null}
+          <LoginForm />
+        </section>
+
+        <aside className="auth-side" aria-label="Commitly 工作流">
           <p className="eyebrow">Commitly</p>
-          <h1>登录到承诺看板</h1>
-        </div>
-        {authError ? <p className="error-text auth-error">{formatAuthCallbackMessage(authError)}</p> : null}
-        <LoginForm />
-      </section>
+          <h2>每天只追踪已经说清楚的承诺</h2>
+          <ul>
+            <li>粘贴会议纪要、邮件或聊天记录。</li>
+            <li>先审核 AI 提取的草稿，再进入看板。</li>
+            <li>按今日、逾期、双方责任和完成状态查看。</li>
+          </ul>
+        </aside>
+      </div>
     </main>
   );
 }

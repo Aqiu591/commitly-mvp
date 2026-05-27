@@ -37,8 +37,8 @@ export default async function DashboardPage() {
       <section className="page-heading">
         <div>
           <p className="eyebrow">看板</p>
-          <h1>承诺看板</h1>
-          <p className="heading-note">先处理逾期和今日到期，再看未来跟进和待定日期。</p>
+          <h1>今天的承诺</h1>
+          <p className="heading-note">按紧急程度和责任方向分组，先处理今日和逾期，再查看后续跟进。</p>
         </div>
         <a className="primary-link" href="/import">
           新增导入

@@ -49,7 +49,9 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
         <div>
           <p className="eyebrow">审核</p>
           <h1>审核 AI 提取结果</h1>
-          <p className="heading-note">AI 只负责先找候选承诺。保存前请确认方向、负责人、日期和原文证据。</p>
+          <p className="heading-note">
+            保存前逐条确认承诺内容、责任方向、截止日期、置信度和原文证据。低置信内容会提醒你人工确认。
+          </p>
         </div>
       </section>
       <ReviewWorkbench sourceText={sourceText as SourceText} commitments={(commitments ?? []) as Commitment[]} />

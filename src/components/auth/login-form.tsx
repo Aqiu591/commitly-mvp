@@ -84,6 +84,7 @@ export function LoginForm() {
         邮箱
         <input
           required
+          autoComplete="email"
           type="email"
           value={email}
           onChange={(event) => {
@@ -95,15 +96,16 @@ export function LoginForm() {
       </label>
       <button className="primary-button" disabled={isSubmitting} type="submit">
         <Mail size={18} />
-        {isSubmitting ? "发送中" : "发送登录链接"}
+        {isSubmitting ? "发送中" : "发送登录邮件"}
       </button>
-      {message ? <p className={isErrorMessage ? "error-text" : "form-message"}>{message}</p> : null}
+      {message ? <p className={isErrorMessage ? "status-message error" : "status-message success"}>{message}</p> : null}
       <div className="auth-divider">
         <span>或输入邮件验证码</span>
       </div>
       <label>
         邮件验证码
         <input
+          autoComplete="one-time-code"
           inputMode="numeric"
           value={otp}
           onChange={(event) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Check, Save, Trash2, X } from "lucide-react";
+import { AlertTriangle, Check, Save, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -20,6 +20,7 @@ type ReviewCommitment = {
   dueTimezone: string | null;
   suggestedFollowUpDate: string | null;
   confidence: number;
+  confidenceReason: string;
   riskFlags: string[];
 };
 
@@ -27,6 +28,8 @@ type ReviewWorkbenchProps = {
   sourceText: SourceText;
   commitments: Commitment[];
 };
+
+const LOW_CONFIDENCE_THRESHOLD = 0.75;
 
 export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProps) {
   const router = useRouter();
@@ -118,6 +121,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
         <div>
           <p className="eyebrow">原文信息</p>
           <h2>先看上下文，再改承诺</h2>
+          <p className="source-note">原文只用于审核证据。需要更少留存时，可以在这里删除原文。</p>
         </div>
         <dl className="source-meta">
           <div>
@@ -139,7 +143,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
         </dl>
         <button className="secondary-button" disabled={rawDeleted} onClick={deleteRawText} type="button">
           <Trash2 size={16} />
-          {rawDeleted ? "原文已删除" : "删除原文"}
+          {rawDeleted ? "原文已删除" : "删除沟通原文"}
         </button>
         {sourceText.raw_text && !rawDeleted ? (
           <details className="raw-text-box" open>
@@ -162,6 +166,24 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
       </aside>
 
       <section className="review-stack">
+        <div className="review-list-header">
+          <div>
+            <p className="eyebrow">待确认</p>
+            <h2>{items.length} 条候选承诺</h2>
+            <p>可直接编辑字段，删除误提项，最后一次性确认保存到看板。</p>
+          </div>
+          <div className="review-counters" aria-label="审核统计">
+            <span>
+              <strong>{items.filter(needsHumanReview).length}</strong>
+              <small>需要人工确认</small>
+            </span>
+            <span>
+              <strong>{removedCount}</strong>
+              <small>已移除</small>
+            </span>
+          </div>
+        </div>
+
         {items.length === 0 ? (
           <div className="empty-state">
             <Check size={24} />
@@ -170,15 +192,53 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
           </div>
         ) : (
           items.map((item, index) => (
-            <article className="commitment-editor" key={item.id}>
-              <div className="editor-heading">
-                <div>
+            <article className={`commitment-editor ${needsHumanReview(item) ? "needs-review" : ""}`} key={item.id}>
+              <header className="editor-heading">
+                <div className="editor-title-group">
                   <span className="count-pill">{index + 1}</span>
-                  <strong>AI 信心 {Math.round(item.confidence * 100)}%</strong>
+                  <div>
+                    <p className="commitment-card-label">承诺内容</p>
+                    <h2>{item.title || "未命名承诺"}</h2>
+                  </div>
                 </div>
-                <button className="icon-button" onClick={() => removeItem(item.id)} title="移除" type="button">
-                  <X size={18} />
+                <button className="danger-button compact" onClick={() => removeItem(item.id)} type="button">
+                  <Trash2 size={15} />
+                  删除这条
                 </button>
+              </header>
+
+              <div className="review-facts">
+                <div>
+                  <span>责任方向</span>
+                  <strong>{formatDirection(item.direction)}</strong>
+                </div>
+                <div>
+                  <span>截止日期</span>
+                  <strong>{item.dueDate || "无明确日期"}</strong>
+                </div>
+                <div>
+                  <span>置信度</span>
+                  <strong>{Math.round(item.confidence * 100)}%</strong>
+                </div>
+              </div>
+
+              <div className="confidence-row">
+                <span className={needsHumanReview(item) ? "review-badge warning" : "review-badge ok"}>
+                  {needsHumanReview(item) ? (
+                    <>
+                      <AlertTriangle size={14} />
+                      需要人工确认
+                    </>
+                  ) : (
+                    <>
+                      <Check size={14} />
+                      可信度较高
+                    </>
+                  )}
+                </span>
+                <div className="confidence-meter" aria-label={`AI 置信度 ${Math.round(item.confidence * 100)}%`}>
+                  <span style={{ width: `${Math.round(item.confidence * 100)}%` }} />
+                </div>
               </div>
 
               {item.riskFlags.length > 0 ? (
@@ -187,13 +247,14 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
                   {item.riskFlags.map(formatRiskFlag).join(" / ")}
                 </p>
               ) : null}
+              {item.confidenceReason ? <p className="confidence-reason">{item.confidenceReason}</p> : null}
 
               <label>
-                标题
+                承诺内容
                 <input value={item.title} onChange={(event) => updateItem(item.id, { title: event.target.value })} />
               </label>
               <label>
-                细节
+                补充说明
                 <textarea
                   value={item.details}
                   rows={3}
@@ -207,8 +268,8 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
                     value={item.direction}
                     onChange={(event) => updateItem(item.id, { direction: event.target.value as ReviewCommitment["direction"] })}
                   >
-                    <option value="i_owe">我方要交付</option>
-                    <option value="they_owe">对方要交付</option>
+                    <option value="i_owe">我欠别人</option>
+                    <option value="they_owe">别人欠我</option>
                   </select>
                 </label>
                 <label>
@@ -256,7 +317,11 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
               </div>
               <label>
                 原文证据
-                <input value={item.evidence} onChange={(event) => updateItem(item.id, { evidence: event.target.value })} />
+                <textarea
+                  value={item.evidence}
+                  rows={2}
+                  onChange={(event) => updateItem(item.id, { evidence: event.target.value })}
+                />
               </label>
             </article>
           ))
@@ -272,7 +337,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
           )}
           <button className="primary-button" disabled={isPending || isConfirming} onClick={confirmAll} type="button">
             <Save size={18} />
-            {isPending || isConfirming ? "保存中" : "完成审核，进入看板"}
+            {isPending || isConfirming ? "保存中" : "确认并保存到看板"}
           </button>
         </div>
       </section>
@@ -294,10 +359,19 @@ function toReviewCommitment(commitment: Commitment): ReviewCommitment {
     dueTimezone: commitment.due_timezone,
     suggestedFollowUpDate: commitment.suggested_follow_up_date,
     confidence: commitment.confidence,
+    confidenceReason: commitment.confidence_reason,
     riskFlags: commitment.risk_flags
   };
 }
 
 function emptyToNull(value: string | null) {
   return value && value.trim().length > 0 ? value : null;
+}
+
+function needsHumanReview(item: ReviewCommitment) {
+  return item.confidence < LOW_CONFIDENCE_THRESHOLD || item.riskFlags.length > 0;
+}
+
+function formatDirection(direction: ReviewCommitment["direction"]) {
+  return direction === "i_owe" ? "我欠别人" : "别人欠我";
 }

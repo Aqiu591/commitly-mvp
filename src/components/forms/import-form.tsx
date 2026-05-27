@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardPaste, LoaderCircle, Sparkles } from "lucide-react";
+import { CheckCircle2, ClipboardPaste, LoaderCircle, Sparkles } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -16,12 +16,16 @@ export function ImportForm() {
   );
   const [timezone, setTimezone] = useState(browserTimezone);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [rawText, setRawText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const trimmedTextLength = rawText.trim().length;
+  const canSubmit = trimmedTextLength >= 3 && !isSubmitting;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setNotice("正在分析文本，通常需要几秒钟。");
     setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
@@ -46,17 +50,21 @@ export function ImportForm() {
       const result = await response.json().catch(() => null);
 
       if (!response.ok) {
+        setNotice("");
         setError(formatImportFailureMessage(response.status, result?.error));
         return;
       }
 
       if (!result?.reviewUrl) {
+        setNotice("");
         setError("分析完成了，但没有拿到审核入口。请刷新看板后再试。");
         return;
       }
 
+      setNotice("分析完成，正在打开审核页。");
       router.push(result.reviewUrl);
     } catch {
+      setNotice("");
       setError("无法连接到 Commitly 服务。请确认本地服务还在运行，网络正常后再试。");
     } finally {
       setIsSubmitting(false);
@@ -66,9 +74,14 @@ export function ImportForm() {
   return (
     <form className="import-grid" onSubmit={handleSubmit}>
       <section className="form-panel import-details-panel">
+        <div className="panel-heading-small">
+          <p className="eyebrow">上下文</p>
+          <h2>这段沟通来自哪里</h2>
+          <p>这些信息只帮助看板分组和回看，不会创建联系人库。</p>
+        </div>
         <div className="panel-kicker">
           <Sparkles size={17} />
-          <span>AI 会先提取草稿，最终仍由你确认。</span>
+          <span>AI 只生成待审核草稿，最终仍由你确认。</span>
         </div>
         <label>
           文本来源
@@ -83,7 +96,7 @@ export function ImportForm() {
         <label>
           客户 / 公司
           <input name="customerName" required placeholder="例如：Acme China" />
-          <span className="form-hint">用于看板识别上下文，不会创建联系人表。</span>
+          <span className="form-hint">用于看板显示上下文。</span>
         </label>
         <label>
           联系人
@@ -101,23 +114,44 @@ export function ImportForm() {
           时区
           <input value={timezone} onChange={(event) => setTimezone(event.target.value)} required />
         </label>
+        <ul className="helper-list" aria-label="导入提示">
+          <li>保留“谁答应了什么”和“什么时候完成”。</li>
+          <li>没有明确日期也可以导入，审核时会标记出来。</li>
+          <li>敏感原文可在审核页删除。</li>
+        </ul>
       </section>
       <section className="form-panel text-panel">
+        <div className="field-header">
+          <div>
+            <p className="eyebrow">原文</p>
+            <h2>粘贴中文沟通文本</h2>
+          </div>
+          <span className={trimmedTextLength >= 3 ? "count-chip ready" : "count-chip"}>{trimmedTextLength} 字</span>
+        </div>
         <label>
           沟通原文
           <textarea
             name="rawText"
             required
+            minLength={3}
             rows={18}
             value={rawText}
             onChange={(event) => setRawText(event.target.value)}
             placeholder="粘贴会议纪要、邮件、聊天记录或电话摘要。尽量保留谁答应了什么、给谁、什么时候完成。"
           />
-          <span className="form-hint">{rawText.trim().length} 字。3 字以上即可分析，越完整越容易提取准确。</span>
+          <span className="form-hint">3 字以上即可分析，越完整越容易提取准确。</span>
         </label>
+        {error ? (
+          <p className="status-message error">{error}</p>
+        ) : notice ? (
+          <p className={isSubmitting ? "status-message loading" : "status-message success"}>
+            {isSubmitting ? <LoaderCircle className="spin" size={16} /> : <CheckCircle2 size={16} />}
+            {notice}
+          </p>
+        ) : null}
         <div className="form-actions">
-          {error ? <p className="error-text">{error}</p> : <span />}
-          <button className="primary-button" disabled={isSubmitting} type="submit">
+          <span className="form-message">下一步会进入审核页，不会直接写入正式看板。</span>
+          <button className="primary-button" disabled={!canSubmit} type="submit">
             {isSubmitting ? <LoaderCircle className="spin" size={18} /> : <ClipboardPaste size={18} />}
             {isSubmitting ? "分析中" : "开始分析"}
           </button>

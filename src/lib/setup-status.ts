@@ -7,22 +7,22 @@ export type EnvGroup = {
 export const ENV_GROUPS: EnvGroup[] = [
   {
     title: "基础访问",
-    description: "本地和线上访问地址。",
+    description: "Commitly 自己的访问地址，用于邮件链接和回调。",
     names: ["NEXT_PUBLIC_APP_URL"]
   },
   {
     title: "Supabase",
-    description: "登录、数据库和 RLS 权限需要这些配置。",
+    description: "负责登录、数据库和权限。登录页至少需要前两项。",
     names: ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"]
   },
   {
     title: "OpenAI",
-    description: "AI 承诺提取需要 API key，模型变量有默认值但建议显式配置。",
+    description: "负责把沟通文本提取成待审核承诺。模型变量有默认值。",
     names: ["OPENAI_API_KEY", "OPENAI_ANALYSIS_MODEL", "OPENAI_EVAL_MODEL"]
   },
   {
     title: "Resend 和定时任务",
-    description: "每日邮件简报和 Vercel Cron 需要这些配置。",
+    description: "用于每日邮件简报和定时触发。",
     names: ["RESEND_API_KEY", "DAILY_DIGEST_FROM", "CRON_SECRET"]
   }
 ];
