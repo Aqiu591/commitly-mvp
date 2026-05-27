@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { formatImportFailureMessage, formatLoginAuthMessage, formatRiskFlag } from "@/lib/user-facing";
+import {
+  formatAuthCallbackMessage,
+  formatImportFailureMessage,
+  formatLoginAuthMessage,
+  formatRiskFlag
+} from "@/lib/user-facing";
 
 describe("user-facing copy helpers", () => {
   it("keeps login failures in plain Chinese instead of raw provider text", () => {
@@ -18,5 +23,9 @@ describe("user-facing copy helpers", () => {
   it("translates review risk flags for humans", () => {
     expect(formatRiskFlag("no_due_date")).toBe("没有明确截止日期");
     expect(formatRiskFlag("conditional_language")).toBe("带条件，需要人工确认");
+  });
+
+  it("explains browser mismatch magic-link failures", () => {
+    expect(formatAuthCallbackMessage("browser_mismatch")).toContain("同一个浏览器");
   });
 });

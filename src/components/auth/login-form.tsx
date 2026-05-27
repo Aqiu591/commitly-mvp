@@ -28,7 +28,11 @@ export function LoginForm() {
 
     setIsSubmitting(false);
     setIsErrorMessage(Boolean(error));
-    setMessage(error ? formatLoginAuthMessage(error.message) : "登录链接已发送，请检查邮箱。链接通常几分钟内送达。");
+    setMessage(
+      error
+        ? formatLoginAuthMessage(error.message)
+        : "登录链接已发送，请检查邮箱。请在当前这个浏览器里打开邮件按钮；如果邮箱客户端跳到别的浏览器，请复制链接到这里打开。"
+    );
   }
 
   return (

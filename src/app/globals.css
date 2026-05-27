@@ -131,6 +131,15 @@ button:disabled {
   box-shadow: var(--shadow);
 }
 
+.auth-error {
+  margin-top: 18px;
+  border: 1px solid rgba(200, 79, 49, 0.22);
+  border-radius: 8px;
+  background: rgba(200, 79, 49, 0.08);
+  padding: 12px;
+  line-height: 1.5;
+}
+
 .stack {
   display: grid;
   gap: 16px;

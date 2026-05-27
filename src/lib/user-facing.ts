@@ -1,4 +1,5 @@
 export type MissingConfigContext = "ai" | "cron" | "email" | "general";
+export type AuthCallbackErrorCode = "expired" | "browser_mismatch" | "missing_code" | "unknown";
 
 const riskFlagLabels: Record<string, string> = {
   no_due_date: "没有明确截止日期",
@@ -33,6 +34,36 @@ export function formatLoginAuthMessage(rawMessage?: string) {
   }
 
   return "登录失败，请确认邮箱可用，稍后再试。";
+}
+
+export function formatAuthCallbackMessage(code?: string) {
+  if (code === "expired") {
+    return "登录链接已失效或已经用过。请重新发送一封登录邮件。";
+  }
+
+  if (code === "browser_mismatch") {
+    return "登录链接没有在同一个浏览器里完成。请在发送登录邮件的这个浏览器里打开邮件按钮；如果邮箱客户端跳到别的浏览器，请复制邮件里的链接到当前浏览器地址栏。";
+  }
+
+  if (code === "missing_code") {
+    return "登录链接不完整。请重新发送一封登录邮件后再试。";
+  }
+
+  return "登录链接无法完成登录。请重新发送一封登录邮件后再试。";
+}
+
+export function classifyAuthCallbackError(message?: string | null): AuthCallbackErrorCode {
+  const normalized = message?.toLowerCase() ?? "";
+
+  if (normalized.includes("code verifier") || normalized.includes("code_verifier")) {
+    return "browser_mismatch";
+  }
+
+  if (normalized.includes("expired") || normalized.includes("invalid")) {
+    return "expired";
+  }
+
+  return "unknown";
 }
 
 export function formatImportFailureMessage(status: number, errorMessage?: string) {
