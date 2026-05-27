@@ -38,7 +38,7 @@ export function formatLoginAuthMessage(rawMessage?: string) {
 
 export function formatAuthCallbackMessage(code?: string) {
   if (code === "expired") {
-    return "登录链接已失效或已经用过。请重新发送一封登录邮件。";
+    return "登录的一次性链接已失效或已经用过。请重新发送登录邮件，并只使用最新一封。若邮箱客户端会预打开链接，可以改用邮件里的验证码登录。";
   }
 
   if (code === "browser_mismatch") {
@@ -50,6 +50,24 @@ export function formatAuthCallbackMessage(code?: string) {
   }
 
   return "登录链接无法完成登录。请重新发送一封登录邮件后再试。";
+}
+
+export function normalizeEmailOtp(value: string) {
+  return value.replace(/\s+/g, "").trim();
+}
+
+export function formatEmailOtpVerifyMessage(rawMessage?: string) {
+  const normalized = rawMessage?.toLowerCase() ?? "";
+
+  if (normalized.includes("expired") || normalized.includes("invalid") || normalized.includes("token")) {
+    return "验证码已失效或不正确。请重新发送登录邮件，并输入最新一封里的验证码。";
+  }
+
+  if (normalized.includes("rate") || normalized.includes("too many")) {
+    return "验证尝试太频繁了，请稍等一会儿再试。";
+  }
+
+  return "验证码登录失败。请检查邮箱和验证码后再试。";
 }
 
 export function classifyAuthCallbackError(message?: string | null): AuthCallbackErrorCode {

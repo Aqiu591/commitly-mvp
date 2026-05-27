@@ -14,6 +14,13 @@ export const analyzeRequestSchema = z.object({
 
 export type AnalyzeRequestInput = z.infer<typeof analyzeRequestSchema>;
 
+export const emailOtpVerifyRequestSchema = z.object({
+  email: z.string().trim().email(),
+  token: z.string().transform((value) => value.replace(/\s+/g, "")).pipe(z.string().min(6))
+});
+
+export type EmailOtpVerifyRequestInput = z.infer<typeof emailOtpVerifyRequestSchema>;
+
 const nullableDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/)

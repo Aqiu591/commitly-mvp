@@ -140,6 +140,23 @@ button:disabled {
   line-height: 1.5;
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+}
+
 .stack {
   display: grid;
   gap: 16px;
@@ -288,6 +305,11 @@ textarea:focus {
 .form-message,
 .muted-text {
   color: var(--muted);
+}
+
+.form-message code {
+  color: var(--ink);
+  font-size: 0.86em;
 }
 
 .error-text {

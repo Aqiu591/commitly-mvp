@@ -6,7 +6,7 @@ Commitly 是一个轻量的“客户沟通承诺追踪工具”。你可以粘�
 
 ## 试用流程
 
-1. 登录：用邮箱收 magic link。
+1. 登录：用邮箱收 magic link；如果邮箱客户端预打开了一次性链接，也可以输入邮件验证码登录。
 2. 导入：粘贴一段真实沟通文本，填写客户、项目和沟通时间。
 3. 审核：删掉不像承诺的项，确认方向、负责人、截止日期和原文证据。
 4. 看板：优先看逾期和今日到期，再处理未来跟进和待定日期。
@@ -30,6 +30,8 @@ Commitly 是一个轻量的“客户沟通承诺追踪工具”。你可以粘�
 5. 执行 `npm run dev`，打开 `http://localhost:3000`。
 
 页面缺少 Supabase 配置时会进入 `/setup`，导入页缺少 OpenAI 配置时会显示中文提示，邮件发送失败时会提示检查 Resend 发件域名、API Key 和收件人邮箱。
+
+为了让验证码备用登录可用，建议在 Supabase Auth 的 Magic Link 邮件模板里保留登录按钮，同时加入一行 `验证码：{{ .Token }}`。这样 QQ 邮箱或安全软件提前打开 magic link 时，用户仍可用验证码登录。
 
 每日简报接口支持 `POST /api/reminders/daily-digest` 手动触发，也支持 `GET /api/reminders/daily-digest` 给 Vercel Cron 使用。
 

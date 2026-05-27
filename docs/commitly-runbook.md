@@ -9,11 +9,12 @@
 ## 本地联调顺序
 
 1. Supabase：执行 `supabase/migrations/001_init.sql`，补齐 Supabase 环境变量。
-2. OpenAI：确认 `.env.local` 里有 `OPENAI_API_KEY`，导入页才能分析文本。
-3. Resend：补齐 `RESEND_API_KEY` 和 `DAILY_DIGEST_FROM`，每日简报才能发送。
-4. Cron：补齐 `CRON_SECRET`，本地手动触发和 Vercel Cron 都要带 Bearer token。
-5. 本地完整流程：登录 -> 导入 -> AI 分析 -> 审核 -> 看板。
-6. 部署前执行 `npm run doctor:full`。
+2. Supabase Auth 邮件模板：Magic Link 邮件里保留登录按钮，并加入 `验证码：{{ .Token }}`，用于一次性链接失效时备用登录。
+3. OpenAI：确认 `.env.local` 里有 `OPENAI_API_KEY`，导入页才能分析文本。
+4. Resend：补齐 `RESEND_API_KEY` 和 `DAILY_DIGEST_FROM`，每日简报才能发送。
+5. Cron：补齐 `CRON_SECRET`，本地手动触发和 Vercel Cron 都要带 Bearer token。
+6. 本地完整流程：登录 -> 导入 -> AI 分析 -> 审核 -> 看板。
+7. 部署前执行 `npm run doctor:full`。
 
 ## 普通试用者怎么走
 
@@ -27,6 +28,8 @@
 
 - `缺少 OPENAI_API_KEY`：补齐 OpenAI 配置，重启本地服务，再重新导入。
 - `请先登录`：登录态过期，回到 `/login` 重新收 magic link。
+- `登录的一次性链接已失效或已经用过`：重新发送登录邮件，只使用最新一封；如果邮箱客户端会预打开链接，输入邮件里的验证码登录。
+- `验证码已失效或不正确`：重新发送登录邮件，并输入最新一封里的验证码。
 - `AI 分析超时`：先缩短原文，或稍后重试。
 - `每日简报发送失败`：检查 Resend 发件域名是否验证、API Key 是否有效、收件邮箱是否存在。
 - `缺少 CRON_SECRET`：补齐 Cron 配置后再触发每日简报接口。
