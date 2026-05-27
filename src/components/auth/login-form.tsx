@@ -16,6 +16,13 @@ export function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
+  function clearMessage() {
+    if (message) {
+      setMessage("");
+      setIsErrorMessage(false);
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
@@ -79,7 +86,10 @@ export function LoginForm() {
           required
           type="email"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            clearMessage();
+          }}
           placeholder="you@example.com"
         />
       </label>
@@ -96,7 +106,10 @@ export function LoginForm() {
         <input
           inputMode="numeric"
           value={otp}
-          onChange={(event) => setOtp(event.target.value)}
+          onChange={(event) => {
+            setOtp(event.target.value);
+            clearMessage();
+          }}
           placeholder="例如：123456"
         />
       </label>

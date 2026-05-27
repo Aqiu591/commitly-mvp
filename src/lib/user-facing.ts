@@ -22,7 +22,7 @@ export function formatLoginAuthMessage(rawMessage?: string) {
   }
 
   if (normalized.includes("rate") || normalized.includes("too many")) {
-    return "登录邮件发送太频繁了，请稍等一会儿再试。";
+    return "Supabase 暂时限制继续发送登录邮件。这通常是项目邮件额度或同一邮箱请求太频繁，不是 Commitly 本地倒计时。请先使用最新邮件里的验证码登录，或稍后再发。";
   }
 
   if (normalized.includes("invalid") && normalized.includes("email")) {

@@ -12,7 +12,7 @@ import {
 describe("user-facing copy helpers", () => {
   it("keeps login failures in plain Chinese instead of raw provider text", () => {
     expect(formatLoginAuthMessage("Email rate limit exceeded")).toBe(
-      "登录邮件发送太频繁了，请稍等一会儿再试。"
+      "Supabase 暂时限制继续发送登录邮件。这通常是项目邮件额度或同一邮箱请求太频繁，不是 Commitly 本地倒计时。请先使用最新邮件里的验证码登录，或稍后再发。"
     );
   });
 
