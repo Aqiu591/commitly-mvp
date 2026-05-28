@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail } from "lucide-react";
+import { LoaderCircle, Mail } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -81,7 +81,7 @@ export function LoginForm() {
   return (
     <form className="stack" onSubmit={handleSubmit}>
       <label>
-        邮箱
+        <span>邮箱地址</span>
         <input
           required
           autoComplete="email"
@@ -94,16 +94,31 @@ export function LoginForm() {
           placeholder="you@example.com"
         />
       </label>
-      <button className="primary-button" disabled={isSubmitting} type="submit">
-        <Mail size={18} />
-        {isSubmitting ? "发送中" : "发送登录邮件"}
+
+      <button className="primary-button" disabled={isSubmitting || !email.trim()} type="submit">
+        {isSubmitting ? (
+          <>
+            <LoaderCircle size={17} className="spin" />
+            发送中…
+          </>
+        ) : (
+          <>
+            <Mail size={17} />
+            发送登录邮件
+          </>
+        )}
       </button>
-      {message ? <p className={isErrorMessage ? "status-message error" : "status-message success"}>{message}</p> : null}
+
+      {message && !isErrorMessage ? (
+        <p className="status-message success">{message}</p>
+      ) : null}
+
       <div className="auth-divider">
-        <span>或输入邮件验证码</span>
+        <span>或者</span>
       </div>
+
       <label>
-        邮件验证码
+        <span>邮件验证码</span>
         <input
           autoComplete="one-time-code"
           inputMode="numeric"
@@ -112,21 +127,29 @@ export function LoginForm() {
             setOtp(event.target.value);
             clearMessage();
           }}
-          placeholder="例如：123456"
+          placeholder="6 位数字验证码"
         />
       </label>
+
       <button
         className="secondary-button"
         disabled={isVerifying || !email.trim() || normalizeEmailOtp(otp).length < 6}
         onClick={verifyOtp}
         type="button"
       >
-        {isVerifying ? "验证中" : "用验证码登录"}
+        {isVerifying ? "验证中…" : "用验证码登录"}
       </button>
-      <p className="form-message">
-        如果邮件按钮被邮箱客户端预打开导致失效，请使用最新一封邮件里的验证码。若邮件里没有验证码，请在 Supabase 邮件模板中加入{" "}
-        <code>{"{{ .Token }}"}</code>。
-      </p>
+
+      {message && isErrorMessage ? (
+        <p className="status-message error">{message}</p>
+      ) : null}
+
+      {!message ? (
+        <p className="form-message">
+          如果邮件按钮被邮箱客户端预打开导致失效，请使用最新一封邮件里的验证码。若邮件里没有验证码，请在 Supabase 邮件模板中加入{" "}
+          <code>{"{{ .Token }}"}</code>。
+        </p>
+      ) : null}
     </form>
   );
 }

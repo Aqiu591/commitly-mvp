@@ -30,17 +30,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="auth-layout">
         <section className="auth-panel">
           <div>
-            <p className="eyebrow">Commitly</p>
-            <h1>登录到承诺看板</h1>
-            <p className="heading-note">用邮箱登录后，继续导入沟通文本、审核 AI 草稿和查看每日承诺。</p>
+            <p className="eyebrow">登录</p>
+            <h1>欢迎回到 Commitly</h1>
+            <p className="heading-note">用邮箱登录，继续追踪你的客户承诺。</p>
           </div>
-          {authError ? <p className="error-text auth-error">{formatAuthCallbackMessage(authError)}</p> : null}
+          {authError ? <p className="status-message error auth-error">{formatAuthCallbackMessage(authError)}</p> : null}
           <LoginForm />
         </section>
 
         <aside className="auth-side" aria-label="Commitly 工作流">
-          <p className="eyebrow">Commitly</p>
-          <h2>每天只追踪已经说清楚的承诺</h2>
+          <p className="eyebrow">工作流</p>
+          <h2>只追踪已经说清楚的承诺</h2>
           <ul>
             <li>粘贴会议纪要、邮件或聊天记录。</li>
             <li>先审核 AI 提取的草稿，再进入看板。</li>

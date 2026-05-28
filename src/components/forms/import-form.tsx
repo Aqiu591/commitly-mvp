@@ -80,8 +80,8 @@ export function ImportForm() {
           <p>这些信息只帮助看板分组和回看，不会创建联系人库。</p>
         </div>
         <div className="panel-kicker">
-          <Sparkles size={17} />
-          <span>AI 只生成待审核草稿，最终仍由你确认。</span>
+          <Sparkles size={15} />
+          <span>AI 生成待审核草稿，最终由你确认。</span>
         </div>
         <label>
           文本来源
@@ -96,16 +96,17 @@ export function ImportForm() {
         <label>
           客户 / 公司
           <input name="customerName" required placeholder="例如：Acme China" />
-          <span className="form-hint">用于看板显示上下文。</span>
         </label>
-        <label>
-          联系人
-          <input name="contactName" placeholder="例如：王经理" />
-        </label>
-        <label>
-          项目
-          <input name="projectName" placeholder="例如：Q3 续约" />
-        </label>
+        <div className="two-column">
+          <label>
+            联系人
+            <input name="contactName" placeholder="例如：王经理" />
+          </label>
+          <label>
+            项目
+            <input name="projectName" placeholder="例如：Q3 续约" />
+          </label>
+        </div>
         <label>
           沟通发生时间
           <input name="communicatedAt" required type="datetime-local" defaultValue={defaultDateTimeLocal()} />
@@ -126,7 +127,9 @@ export function ImportForm() {
             <p className="eyebrow">原文</p>
             <h2>粘贴中文沟通文本</h2>
           </div>
-          <span className={trimmedTextLength >= 3 ? "count-chip ready" : "count-chip"}>{trimmedTextLength} 字</span>
+          <span className={trimmedTextLength >= 3 ? "count-chip ready" : "count-chip"}>
+            {trimmedTextLength} 字
+          </span>
         </div>
         <label>
           沟通原文
@@ -134,26 +137,41 @@ export function ImportForm() {
             name="rawText"
             required
             minLength={3}
-            rows={18}
+            rows={16}
             value={rawText}
             onChange={(event) => setRawText(event.target.value)}
-            placeholder="粘贴会议纪要、邮件、聊天记录或电话摘要。尽量保留谁答应了什么、给谁、什么时候完成。"
+            placeholder={"粘贴会议纪要、邮件、聊天记录或电话摘要。\n\n尽量保留：谁答应了什么、给谁、什么时候完成。"}
           />
-          <span className="form-hint">3 字以上即可分析，越完整越容易提取准确。</span>
+          <span className="form-hint">
+            {trimmedTextLength < 3
+              ? "至少需要 3 个字才能开始分析。"
+              : `已输入 ${trimmedTextLength} 字，内容越完整提取越准确。`}
+          </span>
         </label>
+
         {error ? (
           <p className="status-message error">{error}</p>
         ) : notice ? (
           <p className={isSubmitting ? "status-message loading" : "status-message success"}>
-            {isSubmitting ? <LoaderCircle className="spin" size={16} /> : <CheckCircle2 size={16} />}
+            {isSubmitting ? <LoaderCircle className="spin" size={15} /> : <CheckCircle2 size={15} />}
             {notice}
           </p>
         ) : null}
+
         <div className="form-actions">
           <span className="form-message">下一步会进入审核页，不会直接写入正式看板。</span>
           <button className="primary-button" disabled={!canSubmit} type="submit">
-            {isSubmitting ? <LoaderCircle className="spin" size={18} /> : <ClipboardPaste size={18} />}
-            {isSubmitting ? "分析中" : "开始分析"}
+            {isSubmitting ? (
+              <>
+                <LoaderCircle className="spin" size={17} />
+                分析中…
+              </>
+            ) : (
+              <>
+                <ClipboardPaste size={17} />
+                开始分析
+              </>
+            )}
           </button>
         </div>
       </section>

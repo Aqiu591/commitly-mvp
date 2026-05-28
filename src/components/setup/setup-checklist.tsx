@@ -30,20 +30,30 @@ export function SetupChecklist({
         </Link>
       </section>
       <p className="setup-intro">{description}</p>
+
       <section className={`setup-summary ${missingRequiredRows.length > 0 ? "needs-action" : "ready"}`}>
         <div>
           <p className="eyebrow">环境状态</p>
-          <h2>{missingRequiredRows.length > 0 ? `还有 ${missingRequiredRows.length} 项关键配置缺失` : "关键配置已齐"}</h2>
-          <p>这里只显示配置项是否存在，不显示也不读取任何密钥值。</p>
+          <h2>
+            {missingRequiredRows.length > 0
+              ? `还有 ${missingRequiredRows.length} 项关键配置缺失`
+              : "关键配置已齐，可以开始使用"}
+          </h2>
+          <p>这里只显示配置项是否存在，不显示也不读取任何密钥值。补齐后请重启本地服务。</p>
         </div>
         <div className="setup-progress">
-          {missingRequiredRows.length > 0 ? <AlertTriangle size={22} /> : <CheckCircle2 size={22} />}
+          {missingRequiredRows.length > 0 ? (
+            <AlertTriangle size={20} color="var(--warning)" />
+          ) : (
+            <CheckCircle2 size={20} color="var(--done)" />
+          )}
           <strong>
             {configuredRequiredCount}/{requiredRows.length}
           </strong>
           <span>关键配置</span>
         </div>
       </section>
+
       {missingRequiredRows.length > 0 ? (
         <section className="setup-missing-list" aria-label="缺失配置">
           <strong>下一步先补：</strong>
@@ -56,29 +66,37 @@ export function SetupChecklist({
           </ul>
         </section>
       ) : null}
+
       <div className="setup-grid">
-        {groups.map((group) => (
-          <section className="setup-group" key={group.title}>
-            <div>
-              <h2>{group.title}</h2>
-              <p>{group.description}</p>
-            </div>
-            <ul>
-              {group.rows.map((row) => (
-                <li className={row.configured ? "configured" : "missing"} key={row.name}>
-                  <span>
-                    <code>{row.name}</code>
-                    <small>{row.required ? "关键配置" : "可选配置"}</small>
-                  </span>
-                  <span className={row.configured ? "status-ok" : "status-missing"}>
-                    {row.configured ? "已配置" : row.required ? "缺少" : "可选"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+        {groups.map((group) => {
+          const groupConfigured = group.rows.filter((r) => r.configured).length;
+          return (
+            <section className="setup-group" key={group.title}>
+              <div>
+                <h2>{group.title}</h2>
+                <p>{group.description}</p>
+              </div>
+              <ul>
+                {group.rows.map((row) => (
+                  <li key={row.name}>
+                    <span>
+                      <code>{row.name}</code>
+                      <small>{row.required ? "关键" : "可选"}</small>
+                    </span>
+                    <span className={row.configured ? "status-ok" : "status-missing"}>
+                      {row.configured ? "已配置" : row.required ? "缺少" : "可选"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="setup-group-progress">
+                {groupConfigured}/{group.rows.length} 项已配置
+              </p>
+            </section>
+          );
+        })}
       </div>
+
       <section className="setup-next">
         <h2>建议顺序</h2>
         <ol>

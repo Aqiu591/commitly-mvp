@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Circle, RotateCcw } from "lucide-react";
+import { CheckCircle2, Circle, LoaderCircle, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -20,7 +20,7 @@ const sectionOrder: Array<{
   tone: "neutral" | "urgent" | "done";
 }> = [
   { key: "today", title: "今日到期", description: "今天需要完成或跟进", emptyMessage: "今天没有到期承诺", tone: "neutral" },
-  { key: "overdue", title: "已逾期", description: "优先补救这些事项", emptyMessage: "没有逾期承诺", tone: "urgent" },
+  { key: "overdue", title: "已逾期", description: "优先补救这些事项", emptyMessage: "没有逾期承诺，做得很好", tone: "urgent" },
   { key: "iOwe", title: "我欠别人", description: "我方未来要交付", emptyMessage: "没有未来要交付的承诺", tone: "neutral" },
   { key: "theyOwe", title: "别人欠我", description: "对方未来要交付", emptyMessage: "没有需要对方交付的承诺", tone: "neutral" },
   { key: "noDueDate", title: "无明确日期", description: "需要补充日期或跟进", emptyMessage: "没有待补日期的承诺", tone: "neutral" },
@@ -37,8 +37,12 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
       <section className="digest-card">
         <div>
           <p className="eyebrow">今日工作台</p>
-          <h2>{sections.today.length === 0 ? "今天没有到期承诺" : `今天到期 ${sections.today.length} 件`}</h2>
-          <p>看板按今日、逾期、责任方向、无明确日期和已完成分组，同一条承诺只会出现一次。</p>
+          <h2>
+            {sections.today.length === 0
+              ? "今天没有到期承诺"
+              : `今天到期 ${sections.today.length} 件，逾期 ${sections.overdue.length} 件`}
+          </h2>
+          <p>看板按今日、逾期、责任方向、日期状态和完成情况分组，同一条承诺只出现一次。</p>
         </div>
         <div className="digest-metrics">
           <span>
@@ -55,15 +59,17 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
           </span>
           <span>
             <strong>{sections.noDueDate.length}</strong>
-            <small>无明确日期</small>
+            <small>无日期</small>
           </span>
         </div>
       </section>
 
       {emptyBoard ? (
         <section className="dashboard-empty">
-          <h2>还没有承诺</h2>
-          <p>先导入一段会议纪要、邮件文本或聊天记录，审核后就会出现在这里。</p>
+          <div>
+            <h2>还没有承诺</h2>
+            <p>先导入一段会议纪要、邮件文本或聊天记录，AI 提取后审核确认就会出现在这里。</p>
+          </div>
           <a className="primary-link" href="/import">
             去导入
           </a>
@@ -97,11 +103,13 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
 function CommitmentCard({ commitment }: { commitment: Commitment }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [toggling, setToggling] = useState(false);
   const [error, setError] = useState("");
   const isDone = commitment.status === "done";
 
   async function setStatus(status: "confirmed" | "done") {
     setError("");
+    setToggling(true);
 
     try {
       const response = await fetch(`/api/commitments/${commitment.id}`, {
@@ -121,21 +129,25 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
       });
     } catch {
       setError("无法连接到 Commitly 服务，请稍后再试。");
+    } finally {
+      setToggling(false);
     }
   }
 
   return (
     <article className="commitment-card">
       <div className="card-title-row">
-        {isDone ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+        {isDone ? <CheckCircle2 size={16} color="var(--done)" /> : <Circle size={16} />}
         <div>
           <span className={`direction-pill ${commitment.direction}`}>{formatDirection(commitment.direction)}</span>
           <h3>{commitment.title}</h3>
         </div>
       </div>
-      <p>{commitment.details || commitment.evidence}</p>
+      {commitment.details || commitment.evidence ? (
+        <p>{commitment.details || commitment.evidence}</p>
+      ) : null}
       <p className="route-line">
-        {commitment.owner_label} 给 {commitment.counterparty_label}
+        {commitment.owner_label} → {commitment.counterparty_label}
       </p>
       <dl>
         <div>
@@ -157,12 +169,18 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
       {error ? <p className="error-text">{error}</p> : null}
       <button
         className="secondary-button compact card-action"
-        disabled={isPending}
+        disabled={isPending || toggling}
         onClick={() => setStatus(isDone ? "confirmed" : "done")}
         type="button"
       >
-        {isDone ? <RotateCcw size={15} /> : <CheckCircle2 size={15} />}
-        {isDone ? "恢复" : "完成"}
+        {toggling ? (
+          <LoaderCircle className="spin" size={14} />
+        ) : isDone ? (
+          <RotateCcw size={14} />
+        ) : (
+          <CheckCircle2 size={14} />
+        )}
+        {toggling ? "更新中…" : isDone ? "恢复" : "完成"}
       </button>
     </article>
   );

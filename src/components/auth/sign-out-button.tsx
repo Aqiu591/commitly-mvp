@@ -20,8 +20,8 @@ export function SignOutButton() {
 
   return (
     <button className="icon-text-button" disabled={isSigningOut} onClick={signOut} type="button">
-      <LogOut size={16} />
-      {isSigningOut ? "退出中" : "退出"}
+      <LogOut size={15} />
+      {isSigningOut ? "退出中…" : "退出"}
     </button>
   );
 }

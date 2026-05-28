@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Check, Save, Trash2 } from "lucide-react";
+import { AlertTriangle, Check, LoaderCircle, Save, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -38,8 +38,10 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
   const [notice, setNotice] = useState("");
   const [rawDeleted, setRawDeleted] = useState(Boolean(sourceText.raw_text_deleted_at || !sourceText.raw_text));
   const [isConfirming, setIsConfirming] = useState(false);
+  const [isDeletingRaw, setIsDeletingRaw] = useState(false);
   const [isPending, startTransition] = useTransition();
   const removedCount = commitments.length - items.length;
+  const needsReviewCount = items.filter(needsHumanReview).length;
 
   function updateItem(id: string, patch: Partial<ReviewCommitment>) {
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
@@ -96,6 +98,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
   async function deleteRawText() {
     setError("");
     setNotice("");
+    setIsDeletingRaw(true);
 
     try {
       const response = await fetch(`/api/source-texts/${sourceText.id}/raw`, {
@@ -112,6 +115,8 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
       setNotice("原文已删除，审核结果仍会保留。");
     } catch {
       setError("无法删除原文。请确认本地服务还在运行，稍后再试。");
+    } finally {
+      setIsDeletingRaw(false);
     }
   }
 
@@ -130,23 +135,37 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
           </div>
           <div>
             <dt>联系人</dt>
-            <dd>{sourceText.contact_name || "-"}</dd>
+            <dd>{sourceText.contact_name || "—"}</dd>
           </div>
           <div>
             <dt>项目</dt>
-            <dd>{sourceText.project_name || "-"}</dd>
+            <dd>{sourceText.project_name || "—"}</dd>
           </div>
           <div>
             <dt>沟通时间</dt>
             <dd>{new Date(sourceText.communicated_at).toLocaleString("zh-CN", { timeZone: sourceText.timezone })}</dd>
           </div>
         </dl>
-        <button className="secondary-button" disabled={rawDeleted} onClick={deleteRawText} type="button">
-          <Trash2 size={16} />
-          {rawDeleted ? "原文已删除" : "删除沟通原文"}
+        <button
+          className="secondary-button"
+          disabled={rawDeleted || isDeletingRaw}
+          onClick={deleteRawText}
+          type="button"
+        >
+          {isDeletingRaw ? (
+            <>
+              <LoaderCircle className="spin" size={14} />
+              删除中…
+            </>
+          ) : (
+            <>
+              <Trash2 size={14} />
+              {rawDeleted ? "原文已删除" : "删除沟通原文"}
+            </>
+          )}
         </button>
         {sourceText.raw_text && !rawDeleted ? (
-          <details className="raw-text-box" open>
+          <details className="raw-text-box">
             <summary>查看沟通原文</summary>
             <p>{sourceText.raw_text}</p>
           </details>
@@ -161,7 +180,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
             <li>最后保存到看板。</li>
           </ol>
         </div>
-        {notice ? <p className="form-message">{notice}</p> : null}
+        {notice ? <p className="status-message success">{notice}</p> : null}
         {sourceText.ai_error ? <p className="error-text">{sourceText.ai_error}</p> : null}
       </aside>
 
@@ -174,7 +193,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
           </div>
           <div className="review-counters" aria-label="审核统计">
             <span>
-              <strong>{items.filter(needsHumanReview).length}</strong>
+              <strong>{needsReviewCount}</strong>
               <small>需要人工确认</small>
             </span>
             <span>
@@ -186,7 +205,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
 
         {items.length === 0 ? (
           <div className="empty-state">
-            <Check size={24} />
+            <Check size={22} />
             <h2>没有待确认承诺</h2>
             <p>可以直接完成审核，或返回导入页换一段更明确的沟通文本。</p>
           </div>
@@ -197,12 +216,12 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
                 <div className="editor-title-group">
                   <span className="count-pill">{index + 1}</span>
                   <div>
-                    <p className="commitment-card-label">承诺内容</p>
+                    <p className="commitment-card-label">承诺 #{index + 1}</p>
                     <h2>{item.title || "未命名承诺"}</h2>
                   </div>
                 </div>
                 <button className="danger-button compact" onClick={() => removeItem(item.id)} type="button">
-                  <Trash2 size={15} />
+                  <Trash2 size={14} />
                   删除这条
                 </button>
               </header>
@@ -226,12 +245,12 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
                 <span className={needsHumanReview(item) ? "review-badge warning" : "review-badge ok"}>
                   {needsHumanReview(item) ? (
                     <>
-                      <AlertTriangle size={14} />
+                      <AlertTriangle size={13} />
                       需要人工确认
                     </>
                   ) : (
                     <>
-                      <Check size={14} />
+                      <Check size={13} />
                       可信度较高
                     </>
                   )}
@@ -243,7 +262,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
 
               {item.riskFlags.length > 0 ? (
                 <p className="risk-line">
-                  <AlertTriangle size={15} />
+                  <AlertTriangle size={14} />
                   {item.riskFlags.map(formatRiskFlag).join(" / ")}
                 </p>
               ) : null}
@@ -257,7 +276,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
                 补充说明
                 <textarea
                   value={item.details}
-                  rows={3}
+                  rows={2}
                   onChange={(event) => updateItem(item.id, { details: event.target.value })}
                 />
               </label>
@@ -332,12 +351,26 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
             <p className="error-text">{error}</p>
           ) : (
             <p className="form-message">
-              将确认 {items.length} 条，移除 {removedCount} 条。
+              将确认 <strong>{items.length}</strong> 条，移除 <strong>{removedCount}</strong> 条。
             </p>
           )}
-          <button className="primary-button" disabled={isPending || isConfirming} onClick={confirmAll} type="button">
-            <Save size={18} />
-            {isPending || isConfirming ? "保存中" : "确认并保存到看板"}
+          <button
+            className="primary-button"
+            disabled={isPending || isConfirming}
+            onClick={confirmAll}
+            type="button"
+          >
+            {isPending || isConfirming ? (
+              <>
+                <LoaderCircle className="spin" size={17} />
+                保存中…
+              </>
+            ) : (
+              <>
+                <Save size={17} />
+                确认并保存到看板
+              </>
+            )}
           </button>
         </div>
       </section>
