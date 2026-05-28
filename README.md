@@ -6,7 +6,7 @@ Commitly 是一个轻量的“客户沟通承诺追踪工具”。你可以粘�
 
 ## 试用流程
 
-1. 登录：用邮箱收 magic link；如果邮箱客户端预打开了一次性链接，也可以输入邮件验证码登录。
+1. 登录：用邮箱收 magic link，并在同一个本地浏览器里打开邮件按钮。
 2. 导入：粘贴一段真实沟通文本，填写客户、项目和沟通时间。
 3. 审核：删掉不像承诺的项，确认方向、负责人、截止日期和原文证据。
 4. 看板：优先看逾期和今日到期，再处理未来跟进和待定日期。
@@ -27,11 +27,16 @@ Commitly 是一个轻量的“客户沟通承诺追踪工具”。你可以粘�
 2. 把 `.env.example` 里的变量名复制到 `.env.local`，补齐真实值。不要把 `.env.local` 提交到 Git。
 3. 在 Supabase 项目里执行 `supabase/migrations/001_init.sql`。
 4. 执行 `npm run doctor`，按提示补齐缺少的变量名。
-5. 执行 `npm run dev`，打开 `http://localhost:3000`。
+5. 执行 `npm run dev`，打开 `http://localhost:3000` 或 `http://127.0.0.1:3000`，两者最好固定用一个。
 
 页面缺少 Supabase 配置时会进入 `/setup`，导入页缺少 OpenAI 配置时会显示中文提示，邮件发送失败时会提示检查 Resend 发件域名、API Key 和收件人邮箱。
 
-为了让验证码备用登录可用，建议在 Supabase Auth 的 Magic Link 邮件模板里保留登录按钮，同时加入一行 `验证码：{{ .Token }}`。这样 QQ 邮箱或安全软件提前打开 magic link 时，用户仍可用验证码登录。
+Supabase Auth 本地登录需要把回调地址加入 Redirect URLs，至少包括你实际打开的本地地址：
+
+- `http://localhost:3000/auth/callback`
+- `http://127.0.0.1:3000/auth/callback`
+
+Magic Link 邮件模板默认保留 Supabase 的 `{{ .ConfirmationURL }}` 即可。如果改成 SSR token hash 模板，请让按钮指向 `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink&next=/dashboard`。验证码登录不作为当前 MVP 的默认入口；只有当邮件模板明确加入 `验证码：{{ .Token }}` 并重新打开 UI 时，才让试用者使用验证码。
 
 每日简报接口支持 `POST /api/reminders/daily-digest` 手动触发，也支持 `GET /api/reminders/daily-digest` 给 Vercel Cron 使用。
 

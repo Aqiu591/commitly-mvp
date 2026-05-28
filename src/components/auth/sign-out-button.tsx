@@ -13,8 +13,9 @@ export function SignOutButton() {
   async function signOut() {
     setIsSigningOut(true);
     const supabase = createSupabaseBrowserClient();
-    await supabase.auth.signOut();
-    router.push("/login");
+    await supabase.auth.signOut().catch(() => null);
+    await fetch("/api/auth/sign-out", { method: "POST" }).catch(() => null);
+    router.replace("/login");
     router.refresh();
   }
 

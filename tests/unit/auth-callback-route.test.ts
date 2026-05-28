@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   missingEnvNames: [] as string[],
-  exchangeCodeForSession: vi.fn()
+  exchangeCodeForSession: vi.fn(),
+  verifyOtp: vi.fn()
 }));
 
 vi.mock("@/lib/setup-status", () => ({
@@ -14,7 +15,8 @@ vi.mock("@/lib/setup-status", () => ({
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({
     auth: {
-      exchangeCodeForSession: mocks.exchangeCodeForSession
+      exchangeCodeForSession: mocks.exchangeCodeForSession,
+      verifyOtp: mocks.verifyOtp
     }
   })
 }));
@@ -25,6 +27,7 @@ describe("auth callback route", () => {
   beforeEach(() => {
     mocks.missingEnvNames = [];
     mocks.exchangeCodeForSession.mockReset();
+    mocks.verifyOtp.mockReset();
   });
 
   it("redirects to login with a readable error when Supabase returns an auth error", async () => {
@@ -60,5 +63,42 @@ describe("auth callback route", () => {
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost:3000/dashboard");
+  });
+
+  it("exchanges a Supabase token hash from SSR magic-link templates", async () => {
+    mocks.verifyOtp.mockResolvedValue({
+      data: { user: { id: "user-1" }, session: { access_token: "token" } },
+      error: null
+    });
+
+    const response = await GET(
+      new NextRequest("http://127.0.0.1:3000/auth/callback?token_hash=hash123&type=magiclink&next=/import", {
+        headers: { host: "127.0.0.1:3000" }
+      })
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://127.0.0.1:3000/import");
+    expect(mocks.verifyOtp).toHaveBeenCalledWith({
+      token_hash: "hash123",
+      type: "magiclink"
+    });
+    expect(mocks.exchangeCodeForSession).not.toHaveBeenCalled();
+  });
+
+  it("redirects to login with a clear error when token hash verification fails", async () => {
+    mocks.verifyOtp.mockResolvedValue({
+      data: { user: null, session: null },
+      error: { message: "Token has expired or is invalid" }
+    });
+
+    const response = await GET(
+      new NextRequest("http://127.0.0.1:3000/auth/callback?token_hash=hash123&type=magiclink", {
+        headers: { host: "127.0.0.1:3000" }
+      })
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://127.0.0.1:3000/login?authError=expired");
   });
 });

@@ -22,7 +22,7 @@ export function formatLoginAuthMessage(rawMessage?: string) {
   }
 
   if (normalized.includes("rate") || normalized.includes("too many")) {
-    return "Supabase 暂时限制继续发送登录邮件。这通常是项目邮件额度或同一邮箱请求太频繁，不是 Commitly 本地倒计时。请先使用最新邮件里的验证码登录，或稍后再发。";
+    return "Supabase 暂时限制继续发送登录邮件。这通常是项目邮件额度或同一邮箱请求太频繁，不是 Commitly 本地倒计时。请稍后再发，或先检查 Supabase Auth 的邮件与限流配置。";
   }
 
   if (normalized.includes("invalid") && normalized.includes("email")) {
@@ -38,7 +38,7 @@ export function formatLoginAuthMessage(rawMessage?: string) {
 
 export function formatAuthCallbackMessage(code?: string) {
   if (code === "expired") {
-    return "登录的一次性链接已失效或已经用过。请重新发送登录邮件，并只使用最新一封。若邮箱客户端会预打开链接，可以改用邮件里的验证码登录。";
+    return "登录的一次性链接已失效或已经用过。请重新发送登录邮件，并只使用最新一封；如果邮箱客户端会预打开链接，请复制最新邮件里的完整链接到当前浏览器地址栏。";
   }
 
   if (code === "browser_mismatch") {
@@ -46,10 +46,10 @@ export function formatAuthCallbackMessage(code?: string) {
   }
 
   if (code === "missing_code") {
-    return "登录链接不完整。请重新发送一封登录邮件后再试。";
+    return "登录链接不完整，可能没有回到 /auth/callback。请重新发送登录邮件后再试；如果仍停在登录页，请检查 Supabase Auth 的 Redirect URLs。";
   }
 
-  return "登录链接无法完成登录。请重新发送一封登录邮件后再试。";
+  return "登录链接无法完成登录。请重新发送登录邮件后再试；如果仍停在登录页，请检查 Supabase Auth 的 Redirect URLs 和邮件模板。";
 }
 
 export function normalizeEmailOtp(value: string) {

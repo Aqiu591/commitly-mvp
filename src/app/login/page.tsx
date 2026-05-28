@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/auth/login-form";
 import { SetupChecklist } from "@/components/setup/setup-checklist";
+import { buildAuthCallbackPathFromLoginParams } from "@/lib/auth-link-params";
 import { getMissingEnvNames, REQUIRED_SUPABASE_PAGE_ENV_NAMES } from "@/lib/setup-status";
 import { requireUser } from "@/lib/supabase/server";
 import { formatAuthCallbackMessage } from "@/lib/user-facing";
@@ -9,6 +10,13 @@ import { formatAuthCallbackMessage } from "@/lib/user-facing";
 type LoginPageProps = {
   searchParams?: Promise<{
     authError?: string;
+    code?: string;
+    token_hash?: string;
+    token?: string;
+    type?: string;
+    next?: string;
+    error?: string;
+    error_description?: string;
   }>;
 };
 
@@ -18,6 +26,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   const params = await searchParams;
+  const authCallbackPath = buildAuthCallbackPathFromLoginParams(params ?? {});
+  if (authCallbackPath) {
+    redirect(authCallbackPath);
+  }
+
   const authError = params?.authError;
   const { user } = await requireUser();
 

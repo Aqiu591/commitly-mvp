@@ -12,7 +12,7 @@ import {
 describe("user-facing copy helpers", () => {
   it("keeps login failures in plain Chinese instead of raw provider text", () => {
     expect(formatLoginAuthMessage("Email rate limit exceeded")).toBe(
-      "Supabase 暂时限制继续发送登录邮件。这通常是项目邮件额度或同一邮箱请求太频繁，不是 Commitly 本地倒计时。请先使用最新邮件里的验证码登录，或稍后再发。"
+      "Supabase 暂时限制继续发送登录邮件。这通常是项目邮件额度或同一邮箱请求太频繁，不是 Commitly 本地倒计时。请稍后再发，或先检查 Supabase Auth 的邮件与限流配置。"
     );
   });
 
@@ -34,6 +34,7 @@ describe("user-facing copy helpers", () => {
   it("explains expired magic links as a one-time-link problem", () => {
     expect(formatAuthCallbackMessage("expired")).toContain("一次性链接");
     expect(formatAuthCallbackMessage("expired")).toContain("最新一封");
+    expect(formatAuthCallbackMessage("expired")).not.toContain("验证码");
   });
 
   it("normalizes pasted email verification codes", () => {

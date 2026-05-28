@@ -1,20 +1,81 @@
 "use client";
 
 import { LoaderCircle, Mail } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { parseAuthHashCallback } from "@/lib/auth-link-params";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { formatLoginAuthMessage, normalizeEmailOtp } from "@/lib/user-facing";
+import { formatAuthCallbackMessage, formatLoginAuthMessage } from "@/lib/user-facing";
 
 export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
   const [message, setMessage] = useState("");
   const [isErrorMessage, setIsErrorMessage] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [isCompletingRedirect, setIsCompletingRedirect] = useState(false);
+
+  useEffect(() => {
+    const callback = parseAuthHashCallback(window.location.hash);
+    if (callback.kind === "empty") {
+      return;
+    }
+
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+
+    if (callback.kind === "error") {
+      setIsErrorMessage(true);
+      setMessage(formatAuthCallbackMessage(callback.errorCode));
+      return;
+    }
+
+    if (callback.kind === "incomplete") {
+      setIsErrorMessage(true);
+      setMessage("登录链接不完整。请重新发送登录邮件，并确认邮件按钮打开的是当前浏览器。");
+      return;
+    }
+
+    let isMounted = true;
+    setIsCompletingRedirect(true);
+    setIsErrorMessage(false);
+    setMessage("正在完成登录，请稍候。");
+
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth
+      .setSession({
+        access_token: callback.accessToken,
+        refresh_token: callback.refreshToken
+      })
+      .then(({ error }) => {
+        if (!isMounted) {
+          return;
+        }
+
+        if (error) {
+          setIsErrorMessage(true);
+          setMessage(formatAuthCallbackMessage("unknown"));
+          setIsCompletingRedirect(false);
+          return;
+        }
+
+        router.replace("/dashboard");
+        router.refresh();
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setIsErrorMessage(true);
+        setMessage("无法完成登录。请确认本地服务还在运行，然后重新发送登录邮件。");
+        setIsCompletingRedirect(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   function clearMessage() {
     if (message) {
@@ -29,11 +90,12 @@ export function LoginForm() {
     setMessage("");
     setIsErrorMessage(false);
 
+    const callbackUrl = `${window.location.origin}/auth/callback`;
     const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`
+        emailRedirectTo: callbackUrl
       }
     });
 
@@ -42,40 +104,8 @@ export function LoginForm() {
     setMessage(
       error
         ? formatLoginAuthMessage(error.message)
-        : "登录链接已发送，请检查邮箱。请在当前这个浏览器里打开邮件按钮；如果邮箱客户端跳到别的浏览器，请复制链接到这里打开。"
+        : `登录链接已发送，请检查邮箱。请在当前这个浏览器里打开邮件按钮；如果邮箱客户端跳到别的浏览器，请复制链接到这里打开。本次回调地址是 ${callbackUrl}。`
     );
-  }
-
-  async function verifyOtp() {
-    setIsVerifying(true);
-    setMessage("");
-    setIsErrorMessage(false);
-
-    try {
-      const response = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          token: normalizeEmailOtp(otp)
-        })
-      });
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        setIsErrorMessage(true);
-        setMessage(result?.error ?? "验证码登录失败。请检查邮箱和验证码后再试。");
-        return;
-      }
-
-      router.push("/dashboard");
-      router.refresh();
-    } catch {
-      setIsErrorMessage(true);
-      setMessage("无法连接到 Commitly 服务。请确认本地服务还在运行，稍后再试。");
-    } finally {
-      setIsVerifying(false);
-    }
   }
 
   return (
@@ -95,7 +125,7 @@ export function LoginForm() {
         />
       </label>
 
-      <button className="primary-button" disabled={isSubmitting || !email.trim()} type="submit">
+      <button className="primary-button" disabled={isSubmitting || isCompletingRedirect || !email.trim()} type="submit">
         {isSubmitting ? (
           <>
             <LoaderCircle size={17} className="spin" />
@@ -113,41 +143,14 @@ export function LoginForm() {
         <p className="status-message success">{message}</p>
       ) : null}
 
-      <div className="auth-divider">
-        <span>或者</span>
-      </div>
-
-      <label>
-        <span>邮件验证码</span>
-        <input
-          autoComplete="one-time-code"
-          inputMode="numeric"
-          value={otp}
-          onChange={(event) => {
-            setOtp(event.target.value);
-            clearMessage();
-          }}
-          placeholder="6 位数字验证码"
-        />
-      </label>
-
-      <button
-        className="secondary-button"
-        disabled={isVerifying || !email.trim() || normalizeEmailOtp(otp).length < 6}
-        onClick={verifyOtp}
-        type="button"
-      >
-        {isVerifying ? "验证中…" : "用验证码登录"}
-      </button>
-
       {message && isErrorMessage ? (
         <p className="status-message error">{message}</p>
       ) : null}
 
       {!message ? (
         <p className="form-message">
-          如果邮件按钮被邮箱客户端预打开导致失效，请使用最新一封邮件里的验证码。若邮件里没有验证码，请在 Supabase 邮件模板中加入{" "}
-          <code>{"{{ .Token }}"}</code>。
+          本地调试时，请确认 Supabase Auth 的 Redirect URLs 包含当前地址的 <code>/auth/callback</code>。
+          如果你在 <code>localhost</code> 和 <code>127.0.0.1</code> 之间切换，请两个地址都加入。
         </p>
       ) : null}
     </form>
