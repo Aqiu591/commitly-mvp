@@ -962,7 +962,8 @@ dd {
 .dashboard-shell {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 56px);
+  max-height: calc(100dvh - 56px);
+  overflow: hidden;
 }
 
 .dashboard-shell > .dashboard-grid {
@@ -1014,7 +1015,6 @@ dd {
 .board-column {
   display: flex;
   flex-direction: column;
-  min-height: 240px;
   overflow: hidden;
   padding: 14px;
 }
