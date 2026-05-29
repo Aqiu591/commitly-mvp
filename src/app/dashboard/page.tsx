@@ -17,21 +17,24 @@ export default async function DashboardPage() {
     data: { user }
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
+  const today = formatDateInTimezone(new Date(), "Asia/Shanghai");
+
+  let commitments: Commitment[] = [];
+
+  if (user) {
+    const { data } = await supabase
+      .from("commitments")
+      .select("*")
+      .eq("user_id", user.id)
+      .neq("status", "draft")
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .order("updated_at", { ascending: false });
+
+    commitments = (data ?? []) as Commitment[];
   }
 
-  const { data } = await supabase
-    .from("commitments")
-    .select("*")
-    .eq("user_id", user.id)
-    .neq("status", "draft")
-    .order("due_date", { ascending: true, nullsFirst: false })
-    .order("updated_at", { ascending: false });
-
-  const today = formatDateInTimezone(new Date(), "Asia/Shanghai");
-  const commitments = (data ?? []) as Commitment[];
   const sections = buildDashboardSections(commitments, today);
+  const isAuthenticated = Boolean(user);
 
   return (
     <main className="page-shell dashboard-shell">
@@ -41,11 +44,17 @@ export default async function DashboardPage() {
           <h1>今天的承诺</h1>
           <p className="heading-note">优先处理今日到期和已逾期项，再按责任方向查看后续跟进。</p>
         </div>
-        <Link className="primary-link" href="/import">
-          新增导入
-        </Link>
+        {isAuthenticated ? (
+          <Link className="primary-link" href="/import">
+            新增导入
+          </Link>
+        ) : (
+          <Link className="primary-link" href="/login">
+            开始使用
+          </Link>
+        )}
       </section>
-      <DashboardBoard sections={sections} today={today} />
+      <DashboardBoard sections={sections} today={today} isAuthenticated={isAuthenticated} />
     </main>
   );
 }
