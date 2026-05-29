@@ -992,7 +992,10 @@ dd {
 }
 
 .board-column {
+  display: flex;
+  flex-direction: column;
   min-height: 240px;
+  max-height: calc(100dvh - 200px);
   padding: 14px;
 }
 
@@ -1009,6 +1012,7 @@ dd {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .board-column header p {
@@ -1033,6 +1037,12 @@ dd {
 .card-stack {
   display: grid;
   gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }
 
 .empty-column-state {
