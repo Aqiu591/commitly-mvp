@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { DashboardBoard } from "@/components/dashboard/dashboard-board";
@@ -40,9 +41,9 @@ export default async function DashboardPage() {
           <h1>今天的承诺</h1>
           <p className="heading-note">优先处理今日到期和已逾期项，再按责任方向查看后续跟进。</p>
         </div>
-        <a className="primary-link" href="/import">
+        <Link className="primary-link" href="/import">
           新增导入
-        </a>
+        </Link>
       </section>
       <DashboardBoard sections={sections} today={today} />
     </main>

@@ -1115,6 +1115,8 @@ dd {
   font-size: 0.86rem;
   line-height: 1.5;
   max-width: 52ch;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .direction-pill {

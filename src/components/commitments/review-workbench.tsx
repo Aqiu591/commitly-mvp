@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle, Check, LoaderCircle, Save, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -211,7 +212,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
             <h2>没有待确认承诺</h2>
             <p>所有候选承诺已移除。可以直接完成审核，或返回导入页换一段承诺关系更清晰的沟通文本。</p>
             <div className="empty-state-actions">
-              <a className="primary-link" href="/import">返回导入页</a>
+              <Link className="primary-link" href="/import">返回导入页</Link>
             </div>
           </div>
         ) : (

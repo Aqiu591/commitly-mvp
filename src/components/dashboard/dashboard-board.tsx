@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, Circle, LoaderCircle, RotateCcw } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -72,9 +73,9 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
             <h2>还没有承诺</h2>
             <p>导入一段会议纪要、邮件或聊天记录，AI 提取后审核确认就会出现在这里。</p>
           </div>
-          <a className="primary-link" href="/import">
+          <Link className="primary-link" href="/import">
             去导入
-          </a>
+          </Link>
         </section>
       ) : null}
     </div>
