@@ -4,9 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/import", label: "导入" },
   { href: "/dashboard", label: "看板" },
-  { href: "/setup", label: "配置" }
+  { href: "/new", label: "+ 新建" }
 ];
 
 export function NavLinks() {

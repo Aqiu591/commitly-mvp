@@ -45,8 +45,8 @@ export default async function DashboardPage() {
           <p className="heading-note">优先处理今日到期和已逾期项，再按责任方向查看后续跟进。</p>
         </div>
         {isAuthenticated ? (
-          <Link className="primary-link" href="/import">
-            新增导入
+          <Link className="primary-link" href="/new">
+            + 新建
           </Link>
         ) : (
           <Link className="primary-link" href="/login">

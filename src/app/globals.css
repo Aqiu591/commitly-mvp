@@ -894,6 +894,67 @@ dd {
   gap: 12px;
 }
 
+.three-column {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* ── Tab Bar ── */
+
+.tab-bar {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  padding: 3px;
+  width: fit-content;
+}
+
+.tab-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+}
+
+.tab-button:hover {
+  color: var(--ink);
+}
+
+.tab-button.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+/* ── Quick Create Form ── */
+
+.quick-create-form {
+  display: grid;
+  gap: 16px;
+  max-width: 640px;
+}
+
+.quick-create-fields {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 22px;
+}
+
 .sticky-actions {
   position: sticky;
   bottom: 16px;
@@ -1823,10 +1884,20 @@ dd {
   }
 
   .two-column,
+  .three-column,
   .review-facts,
   .commitment-card dl,
   .confidence-row {
     grid-template-columns: 1fr;
+  }
+
+  .tab-bar {
+    width: 100%;
+  }
+
+  .tab-button {
+    flex: 1;
+    justify-content: center;
   }
 
   .review-counters,
