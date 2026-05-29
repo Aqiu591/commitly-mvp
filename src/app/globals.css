@@ -953,21 +953,13 @@ dd {
 .board-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: minmax(0, 1fr);
   gap: 14px;
-  flex: 1;
-  min-height: 0;
+  align-items: start;
 }
 
 .dashboard-shell {
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 56px);
-  overflow: hidden;
-}
-
-.dashboard-shell > .dashboard-grid {
-  flex-shrink: 0;
 }
 
 .digest-card {
@@ -1015,7 +1007,6 @@ dd {
 .board-column {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   padding: 14px;
 }
 
@@ -1058,8 +1049,7 @@ dd {
   display: grid;
   gap: 8px;
   overflow-y: auto;
-  flex: 1;
-  min-height: 0;
+  max-height: 480px;
   padding-right: 4px;
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;

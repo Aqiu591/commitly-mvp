@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Circle, LoaderCircle, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import type { DashboardSections } from "@/lib/dashboard/sections";
 import type { Commitment } from "@/lib/types";
@@ -29,13 +29,6 @@ const sectionOrder: Array<{
 ];
 
 export function DashboardBoard({ sections, today }: DashboardBoardProps) {
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
-
   const digestCount =
     sections.today.length + sections.overdue.length + sections.noDueDate.length + sections.iOwe.length + sections.theyOwe.length;
   const emptyBoard = digestCount === 0 && sections.done.length === 0;
