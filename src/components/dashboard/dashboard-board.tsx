@@ -3,7 +3,7 @@
 import { CheckCircle2, Circle, LoaderCircle, LogIn, RotateCcw, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
 import type { DashboardSections } from "@/lib/dashboard/sections";
 import type { Commitment } from "@/lib/types";
@@ -33,14 +33,54 @@ const sectionOrder: Array<{
 export function DashboardBoard({ sections, today, isAuthenticated }: DashboardBoardProps) {
   const digestCount =
     sections.today.length + sections.overdue.length + sections.noDueDate.length + sections.iOwe.length + sections.theyOwe.length;
+  const totalCount = digestCount + sections.done.length;
+  const doneRatio = totalCount > 0 ? sections.done.length / totalCount : 0;
   const emptyBoard = digestCount === 0 && sections.done.length === 0;
 
+  const [spotlight, setSpotlight] = useState({ x: 0.5, y: 0.5, visible: false });
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    const rect = boardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setSpotlight({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+      visible: true
+    });
+  }, []);
+
+  const handlePointerLeave = useCallback(() => {
+    setSpotlight((prev) => ({ ...prev, visible: false }));
+  }, []);
+
+  const greeting = getTimeGreeting();
+
   return (
-    <>
+    <div
+      ref={boardRef}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      style={{ position: "relative" }}
+    >
+      {/* Ambient spotlight */}
+      <div
+        className="spotlight-glow"
+        style={{
+          left: `${spotlight.x * 100}%`,
+          top: `${spotlight.y * 100}%`,
+          opacity: spotlight.visible ? 1 : 0
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Grain texture overlay */}
+      <div className="grain-overlay" aria-hidden="true" />
+
       <div className="dashboard-grid">
         <section className="digest-card">
           <div>
-            <p className="eyebrow">今日工作台</p>
+            <p className="eyebrow">{greeting} · 今日工作台</p>
             <h2>
               {digestCount === 0
                 ? "今天没有待处理承诺"
@@ -49,17 +89,14 @@ export function DashboardBoard({ sections, today, isAuthenticated }: DashboardBo
             <p>按紧急程度和责任方向分组，同一承诺只出现一次。</p>
           </div>
           <div className="digest-metrics">
+            <ProgressRing ratio={doneRatio} />
             <span>
-              <AnimatedNumber target={today.length > 0 ? 1 : 0} />
-              <small>今日日期</small>
+              <AnimatedNumber target={digestCount} />
+              <small>待处理</small>
             </span>
             <span className="metric-urgent">
               <AnimatedNumber target={sections.overdue.length} />
               <small>逾期</small>
-            </span>
-            <span>
-              <AnimatedNumber target={digestCount} />
-              <small>待处理</small>
             </span>
             <span>
               <AnimatedNumber target={sections.noDueDate.length} />
@@ -124,7 +161,12 @@ export function DashboardBoard({ sections, today, isAuthenticated }: DashboardBo
           <section className={`board-column ${section.tone}`} key={section.key}>
             <header>
               <div>
-                <h2>{section.title}</h2>
+                <h2>
+                  {section.key === "today" && sections.today.length > 0 ? (
+                    <span className="breathing-dot" aria-hidden="true" />
+                  ) : null}
+                  {section.title}
+                </h2>
                 <p>{section.description}</p>
               </div>
               <span className={sections[section.key].length > 0 ? "has-items" : ""}>
@@ -148,8 +190,16 @@ export function DashboardBoard({ sections, today, isAuthenticated }: DashboardBo
           </section>
         ))}
       </div>
-    </>
+    </div>
   );
+}
+
+function getTimeGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 10) return "早上好";
+  if (hour < 14) return "中午好";
+  if (hour < 18) return "下午好";
+  return "晚上好";
 }
 
 function AnimatedNumber({ target }: { target: number }) {
@@ -163,13 +213,12 @@ function AnimatedNumber({ target }: { target: number }) {
     let raf: number;
     const duration = 600;
     const start = performance.now();
-    const from = 0;
 
     function tick(now: number) {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setCurrent(Math.round(from + (target - from) * eased));
+      setCurrent(Math.round(target * eased));
 
       if (progress < 1) {
         raf = requestAnimationFrame(tick);
@@ -183,13 +232,79 @@ function AnimatedNumber({ target }: { target: number }) {
   return <strong ref={ref}>{current}</strong>;
 }
 
+function ProgressRing({ ratio }: { ratio: number }) {
+  const circumference = 2 * Math.PI * 20;
+  const offset = circumference * (1 - ratio);
+
+  return (
+    <span className="progress-ring-metric">
+      <svg width="48" height="48" viewBox="0 0 48 48" aria-label={`完成率 ${Math.round(ratio * 100)}%`}>
+        <circle
+          cx="24" cy="24" r="20"
+          fill="none"
+          stroke="var(--line)"
+          strokeWidth="3"
+        />
+        <circle
+          cx="24" cy="24" r="20"
+          fill="none"
+          stroke="var(--done)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          transform="rotate(-90 24 24)"
+          style={{ transition: "stroke-dashoffset 800ms cubic-bezier(0.22, 1, 0.36, 1)" }}
+        />
+        <text
+          x="24" y="24"
+          textAnchor="middle"
+          dominantBaseline="central"
+          fill="currentColor"
+          fontSize="11"
+          fontWeight="750"
+        >
+          {Math.round(ratio * 100)}%
+        </text>
+      </svg>
+      <small>完成率</small>
+    </span>
+  );
+}
+
 function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitment; isAuthenticated: boolean }) {
   const router = useRouter();
+  const cardRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState("");
-  const [showDoneEffect, setShowDoneEffect] = useState(false);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0, gx: 50, gy: 50 });
+  const [isHovered, setIsHovered] = useState(false);
+  const [confetti, setConfetti] = useState<Array<{ id: number; x: number; y: number; color: string; angle: number; speed: number; tx: number; ty: number }>>([]);
+  const confettiId = useRef(0);
   const isDone = commitment.status === "done";
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / rect.width;
+    const dy = (e.clientY - cy) / rect.height;
+    setTilt({
+      rx: dy * -8,
+      ry: dx * 8,
+      gx: (dx + 0.5) * 100,
+      gy: (dy + 0.5) * 100
+    });
+  }, []);
+
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    setTilt({ rx: 0, ry: 0, gx: 50, gy: 50 });
+  }, []);
 
   async function setStatus(status: "confirmed" | "done") {
     if (!isAuthenticated) {
@@ -214,8 +329,7 @@ function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitmen
       }
 
       if (status === "done") {
-        setShowDoneEffect(true);
-        setTimeout(() => setShowDoneEffect(false), 800);
+        spawnConfetti();
       }
 
       startTransition(() => {
@@ -228,8 +342,67 @@ function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitmen
     }
   }
 
+  function spawnConfetti() {
+    const colors = ["#176b5b", "#3e7c50", "#b8573a", "#286a9c", "#a86713", "#788590"];
+    const particles = Array.from({ length: 24 }, () => {
+      confettiId.current += 1;
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
+      const speed = 3 + Math.random() * 5;
+      return {
+        id: confettiId.current,
+        x: 50 + (Math.random() - 0.5) * 30,
+        y: 40 + Math.random() * 20,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        angle,
+        speed,
+        tx: Math.cos(angle) * speed * 20,
+        ty: Math.sin(angle) * speed * 20 - 30
+      };
+    });
+    setConfetti(particles);
+    setTimeout(() => setConfetti([]), 800);
+  }
+
   return (
-    <article className={`commitment-card ${showDoneEffect ? "done-pulse" : ""}`}>
+    <article
+      ref={cardRef}
+      className={`commitment-card ${isHovered ? "card-hovered" : ""}`}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: isHovered
+          ? `perspective(600px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) translateY(-2px)`
+          : "perspective(600px) rotateX(0deg) rotateY(0deg) translateY(0)",
+        transition: isHovered ? "none" : "transform 400ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 400ms ease"
+      }}
+    >
+      {/* Glare overlay */}
+      <div
+        className="card-glare"
+        style={{
+          background: isHovered
+            ? `radial-gradient(circle at ${tilt.gx}% ${tilt.gy}%, rgba(255,255,255,0.15) 0%, transparent 60%)`
+            : "none"
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Confetti particles */}
+      {confetti.map((p) => (
+        <div
+          key={p.id}
+          className="confetti-particle"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            backgroundColor: p.color,
+            "--tx": `${p.tx}px`,
+            "--ty": `${p.ty}px`
+          } as React.CSSProperties}
+        />
+      ))}
+
       <div className="card-title-row">
         {isDone ? <CheckCircle2 size={16} color="var(--done)" /> : <Circle size={16} color="var(--soft)" />}
         <div>
