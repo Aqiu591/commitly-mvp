@@ -17,14 +17,15 @@ const sectionOrder: Array<{
   title: string;
   description: string;
   emptyMessage: string;
+  emptyHint: string;
   tone: "neutral" | "urgent" | "done";
 }> = [
-  { key: "today", title: "今日到期", description: "今天需要完成或跟进", emptyMessage: "今天没有到期承诺", tone: "neutral" },
-  { key: "overdue", title: "已逾期", description: "需要优先补救", emptyMessage: "没有逾期承诺", tone: "urgent" },
-  { key: "iOwe", title: "我欠别人", description: "我方需要交付", emptyMessage: "没有待交付的承诺", tone: "neutral" },
-  { key: "theyOwe", title: "别人欠我", description: "对方需要交付", emptyMessage: "没有待对方交付的承诺", tone: "neutral" },
-  { key: "noDueDate", title: "无明确日期", description: "需要补充截止日期", emptyMessage: "没有待补日期的承诺", tone: "neutral" },
-  { key: "done", title: "已完成", description: "已归档，可恢复", emptyMessage: "还没有已完成的承诺", tone: "done" }
+  { key: "today", title: "今日到期", description: "今天需要完成或跟进", emptyMessage: "今天没有到期承诺", emptyHint: "导入新的沟通文本，AI 会自动提取截止日期", tone: "neutral" },
+  { key: "overdue", title: "已逾期", description: "需要优先补救", emptyMessage: "没有逾期承诺", emptyHint: "保持住，及时处理今日到期项", tone: "urgent" },
+  { key: "iOwe", title: "我欠别人", description: "我方需要交付", emptyMessage: "没有待交付的承诺", emptyHint: "导入文本后，AI 会识别\"我/我方\"的责任", tone: "neutral" },
+  { key: "theyOwe", title: "别人欠我", description: "对方需要交付", emptyMessage: "没有待对方交付的承诺", emptyHint: "导入文本后，AI 会识别\"你/贵方/客户\"的责任", tone: "neutral" },
+  { key: "noDueDate", title: "无明确日期", description: "需要补充截止日期", emptyMessage: "没有待补日期的承诺", emptyHint: "审核时可以给缺少日期的承诺补充截止时间", tone: "neutral" },
+  { key: "done", title: "已完成", description: "已归档，可恢复", emptyMessage: "还没有已完成的承诺", emptyHint: "点击卡片上的\"标记完成\"来归档", tone: "done" }
 ];
 
 export function DashboardBoard({ sections, today }: DashboardBoardProps) {
@@ -87,7 +88,10 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
           </header>
           <div className="card-stack">
             {sections[section.key].length === 0 ? (
-              <p className="empty-column-state">{section.emptyMessage}</p>
+              <div className="empty-column-state">
+                <p>{section.emptyMessage}</p>
+                <p className="form-message">{section.emptyHint}</p>
+              </div>
             ) : (
               sections[section.key].map((commitment, i) => (
                 <div className="card-entrance" style={{ animationDelay: `${i * 50}ms` }} key={`${section.key}-${commitment.id}`}>
