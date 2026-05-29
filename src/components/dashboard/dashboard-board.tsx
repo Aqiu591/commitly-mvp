@@ -34,6 +34,7 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
   const emptyBoard = digestCount === 0 && sections.done.length === 0;
 
   return (
+    <>
     <div className="dashboard-grid">
       <section className="digest-card">
         <div>
@@ -76,7 +77,9 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
           </a>
         </section>
       ) : null}
+    </div>
 
+    <div className="board-grid">
       {sectionOrder.map((section) => (
         <section className={`board-column ${section.tone}`} key={section.key}>
           <header>
@@ -103,6 +106,7 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
         </section>
       ))}
     </div>
+    </>
   );
 }
 
