@@ -57,7 +57,7 @@ export function ImportForm() {
 
       if (!result?.reviewUrl) {
         setNotice("");
-        setError("分析完成了，但没有拿到审核入口。请刷新看板后再试。");
+        setError("分析已完成，但无法跳转到审核页面。请返回看板后重试。");
         return;
       }
 
@@ -77,11 +77,11 @@ export function ImportForm() {
         <div className="panel-heading-small">
           <p className="eyebrow">上下文</p>
           <h2>这段沟通来自哪里</h2>
-          <p>这些信息只帮助看板分组和回看，不会创建联系人库。</p>
+          <p>这些信息仅用于看板分组和后续回看，不会另存为独立的联系人记录。</p>
         </div>
         <div className="panel-kicker">
           <Sparkles size={15} />
-          <span>AI 生成待审核草稿，最终由你确认保存。</span>
+          <span>AI 先生成草稿，由你审核确认后再保存。</span>
         </div>
         <label>
           文本来源

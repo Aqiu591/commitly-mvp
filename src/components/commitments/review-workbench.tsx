@@ -48,6 +48,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
   }
 
   function removeItem(id: string) {
+    if (!window.confirm("确认删除这条候选承诺？")) return;
     setItems((current) => current.filter((item) => item.id !== id));
   }
 
@@ -126,7 +127,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
         <div>
           <p className="eyebrow">原文信息</p>
           <h2>先看上下文，再改承诺</h2>
-          <p className="source-note">原文只用于审核证据。如需减少留存，可在此删除原文。</p>
+          <p className="source-note">原文仅用于审核参考。如无需保留原文，可在此删除。</p>
         </div>
         <dl className="source-meta">
           <div>
@@ -190,7 +191,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
           <div>
             <p className="eyebrow">待确认</p>
             <h2>{items.length} 条候选承诺</h2>
-            <p>可直接编辑字段、删除误提项，最后一次性确认保存。</p>
+            <p>可直接编辑字段、删除误提取的条目，最后一次性确认保存。</p>
           </div>
           <div className="review-counters" aria-label="审核统计">
             <span>
@@ -208,9 +209,9 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
           <div className="empty-state">
             <Check size={22} />
             <h2>没有待确认承诺</h2>
-            <p>所有候选承诺已移除。可以直接完成审核，或返回导入页换一段更明确的沟通文本。</p>
+            <p>所有候选承诺已移除。可以直接完成审核，或返回导入页换一段承诺关系更清晰的沟通文本。</p>
             <div className="empty-state-actions">
-              <a className="primary-link" href="/import">返回导入</a>
+              <a className="primary-link" href="/import">返回导入页</a>
             </div>
           </div>
         ) : (

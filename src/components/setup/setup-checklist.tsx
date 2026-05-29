@@ -10,7 +10,7 @@ type SetupChecklistProps = {
 
 export function SetupChecklist({
   title = "还差几项配置",
-  description = "代码已经能跑，下一步是把真实服务接上。这里不会显示任何密钥值，只显示变量名是否存在。补齐后请重启本地服务。"
+  description = "本地代码已就绪，下一步是连接真实环境服务。这里不会显示任何密钥值，只显示变量名是否存在。补齐后请重启本地服务。"
 }: SetupChecklistProps) {
   const groups = getEnvRows(process.env);
   const rows = groups.flatMap((group) => group.rows);

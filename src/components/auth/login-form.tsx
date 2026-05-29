@@ -68,7 +68,7 @@ export function LoginForm() {
         }
 
         setIsErrorMessage(true);
-        setMessage("无法完成登录。请确认本地服务还在运行，然后重新发送登录邮件。");
+        setMessage("登录失败，请刷新页面后重新发送登录邮件。");
         setIsCompletingRedirect(false);
       });
 
@@ -90,22 +90,28 @@ export function LoginForm() {
     setMessage("");
     setIsErrorMessage(false);
 
-    const callbackUrl = `${window.location.origin}/auth/callback`;
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: callbackUrl
-      }
-    });
+    try {
+      const callbackUrl = `${window.location.origin}/auth/callback`;
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+        options: {
+          emailRedirectTo: callbackUrl
+        }
+      });
 
-    setIsSubmitting(false);
-    setIsErrorMessage(Boolean(error));
-    setMessage(
-      error
-        ? formatLoginAuthMessage(error.message)
-        : `登录链接已发送，请检查邮箱。请在当前这个浏览器里打开邮件按钮；如果邮箱客户端跳到别的浏览器，请复制链接到这里打开。本次回调地址是 ${callbackUrl}。`
-    );
+      setIsSubmitting(false);
+      setIsErrorMessage(Boolean(error));
+      setMessage(
+        error
+          ? formatLoginAuthMessage(error.message)
+          : "登录链接已发送，请检查邮箱。请在当前浏览器中点击邮件内的链接完成登录。"
+      );
+    } catch {
+      setIsSubmitting(false);
+      setIsErrorMessage(true);
+      setMessage("登录失败，请刷新页面后重新发送登录邮件。");
+    }
   }
 
   return (
@@ -157,8 +163,7 @@ export function LoginForm() {
 
           {!message ? (
             <p className="form-message">
-              本地调试时，请确认 Supabase Auth 的 Redirect URLs 包含当前地址的 <code>/auth/callback</code>。
-              如果你在 <code>localhost</code> 和 <code>127.0.0.1</code> 之间切换，请两个地址都加入。
+              未收到邮件？请检查垃圾箱，或确认邮箱地址无误后重新发送。
             </p>
           ) : null}
         </>
