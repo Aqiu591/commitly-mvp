@@ -1,9 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 
 import { NavLinks } from "@/components/nav-links";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import "./globals.css";
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://commitly.app";
 const title = "Commitly - 客户沟通承诺追踪";
@@ -60,7 +73,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   };
 
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" className={`${geist.variable} ${geistMono.variable}`}>
       <head>
         <script
           type="application/ld+json"
