@@ -67,7 +67,7 @@ export function QuickCreateForm() {
           <input
             name="title"
             required
-            placeholder="例如：周五前提交 Q2 续约方案"
+            placeholder="必填：例如周五前提交 Q2 续约方案"
             disabled={isSubmitting}
           />
         </label>

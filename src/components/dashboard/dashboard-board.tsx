@@ -37,45 +37,11 @@ export function DashboardBoard({ sections, today, isAuthenticated }: DashboardBo
   const doneRatio = totalCount > 0 ? sections.done.length / totalCount : 0;
   const emptyBoard = digestCount === 0 && sections.done.length === 0;
 
-  const [spotlight, setSpotlight] = useState({ x: 0.5, y: 0.5, visible: false });
-  const boardRef = useRef<HTMLDivElement>(null);
-
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    const rect = boardRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setSpotlight({
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height,
-      visible: true
-    });
-  }, []);
-
-  const handlePointerLeave = useCallback(() => {
-    setSpotlight((prev) => ({ ...prev, visible: false }));
-  }, []);
-
   const greeting = getTimeGreeting();
 
   return (
-    <div
-      ref={boardRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      style={{ position: "relative" }}
-    >
-      {/* Ambient spotlight */}
-      <div
-        className="spotlight-glow"
-        style={{
-          left: `${spotlight.x * 100}%`,
-          top: `${spotlight.y * 100}%`,
-          opacity: spotlight.visible ? 1 : 0
-        }}
-        aria-hidden="true"
-      />
+    <div style={{ position: "relative" }}>
 
-      {/* Grain texture overlay */}
-      <div className="grain-overlay" aria-hidden="true" />
 
       <div className="dashboard-grid">
         <section className="digest-card">
@@ -293,8 +259,8 @@ function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitmen
     const dx = (e.clientX - cx) / rect.width;
     const dy = (e.clientY - cy) / rect.height;
     setTilt({
-      rx: dy * -8,
-      ry: dx * 8,
+      rx: dy * -3,
+      ry: dx * 3,
       gx: (dx + 0.5) * 100,
       gy: (dy + 0.5) * 100
     });
@@ -367,6 +333,15 @@ function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitmen
     <article
       ref={cardRef}
       className={`commitment-card ${isHovered ? "card-hovered" : ""}`}
+      tabIndex={0}
+      role="button"
+      aria-label={isDone ? `恢复 "${commitment.title}"` : `完成 "${commitment.title}"`}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setStatus(isDone ? "confirmed" : "done");
+        }
+      }}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

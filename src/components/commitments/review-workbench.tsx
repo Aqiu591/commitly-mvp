@@ -98,6 +98,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
   }
 
   async function deleteRawText() {
+    if (!window.confirm("确认删除这条沟通原文？删除后不可恢复。")) return;
     setError("");
     setNotice("");
     setIsDeletingRaw(true);
