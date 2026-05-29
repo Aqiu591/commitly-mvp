@@ -20,11 +20,11 @@ const sectionOrder: Array<{
   tone: "neutral" | "urgent" | "done";
 }> = [
   { key: "today", title: "今日到期", description: "今天需要完成或跟进", emptyMessage: "今天没有到期承诺", tone: "neutral" },
-  { key: "overdue", title: "已逾期", description: "优先补救这些事项", emptyMessage: "没有逾期承诺，做得很好", tone: "urgent" },
-  { key: "iOwe", title: "我欠别人", description: "我方未来要交付", emptyMessage: "没有未来要交付的承诺", tone: "neutral" },
-  { key: "theyOwe", title: "别人欠我", description: "对方未来要交付", emptyMessage: "没有需要对方交付的承诺", tone: "neutral" },
-  { key: "noDueDate", title: "无明确日期", description: "需要补充日期或跟进", emptyMessage: "没有待补日期的承诺", tone: "neutral" },
-  { key: "done", title: "已完成", description: "已归档，可恢复追踪", emptyMessage: "还没有已完成承诺", tone: "done" }
+  { key: "overdue", title: "已逾期", description: "需要优先补救", emptyMessage: "没有逾期承诺", tone: "urgent" },
+  { key: "iOwe", title: "我欠别人", description: "我方需要交付", emptyMessage: "没有待交付的承诺", tone: "neutral" },
+  { key: "theyOwe", title: "别人欠我", description: "对方需要交付", emptyMessage: "没有待对方交付的承诺", tone: "neutral" },
+  { key: "noDueDate", title: "无明确日期", description: "需要补充截止日期", emptyMessage: "没有待补日期的承诺", tone: "neutral" },
+  { key: "done", title: "已完成", description: "已归档，可恢复", emptyMessage: "还没有已完成的承诺", tone: "done" }
 ];
 
 export function DashboardBoard({ sections, today }: DashboardBoardProps) {
@@ -38,11 +38,11 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
         <div>
           <p className="eyebrow">今日工作台</p>
           <h2>
-            {sections.today.length === 0
-              ? "今天没有到期承诺"
+            {digestCount === 0
+              ? "今天没有待处理承诺"
               : `今天到期 ${sections.today.length} 件，逾期 ${sections.overdue.length} 件`}
           </h2>
-          <p>看板按今日、逾期、责任方向、日期状态和完成情况分组，同一条承诺只出现一次。</p>
+          <p>按紧急程度和责任方向分组，同一承诺只出现一次。</p>
         </div>
         <div className="digest-metrics">
           <span>
@@ -68,7 +68,7 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
         <section className="dashboard-empty">
           <div>
             <h2>还没有承诺</h2>
-            <p>先导入一段会议纪要、邮件文本或聊天记录，AI 提取后审核确认就会出现在这里。</p>
+            <p>导入一段会议纪要、邮件或聊天记录，AI 提取后审核确认就会出现在这里。</p>
           </div>
           <a className="primary-link" href="/import">
             去导入
@@ -89,8 +89,10 @@ export function DashboardBoard({ sections, today }: DashboardBoardProps) {
             {sections[section.key].length === 0 ? (
               <p className="empty-column-state">{section.emptyMessage}</p>
             ) : (
-              sections[section.key].map((commitment) => (
-                <CommitmentCard commitment={commitment} key={`${section.key}-${commitment.id}`} />
+              sections[section.key].map((commitment, i) => (
+                <div className="card-entrance" style={{ animationDelay: `${i * 50}ms` }} key={`${section.key}-${commitment.id}`}>
+                  <CommitmentCard commitment={commitment} />
+                </div>
               ))
             )}
           </div>
@@ -137,23 +139,21 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
   return (
     <article className="commitment-card">
       <div className="card-title-row">
-        {isDone ? <CheckCircle2 size={16} color="var(--done)" /> : <Circle size={16} />}
+        {isDone ? <CheckCircle2 size={16} color="var(--done)" /> : <Circle size={16} color="var(--soft)" />}
         <div>
           <span className={`direction-pill ${commitment.direction}`}>{formatDirection(commitment.direction)}</span>
           <h3>{commitment.title}</h3>
         </div>
       </div>
-      {commitment.details || commitment.evidence ? (
-        <p>{commitment.details || commitment.evidence}</p>
+      {commitment.details ? (
+        <p>{commitment.details}</p>
+      ) : commitment.evidence ? (
+        <p>{commitment.evidence}</p>
       ) : null}
       <p className="route-line">
-        {commitment.owner_label} → {commitment.counterparty_label}
+        {commitment.owner_label || "我"} → {commitment.counterparty_label || "对方"}
       </p>
       <dl>
-        <div>
-          <dt>负责人</dt>
-          <dd>{commitment.owner_label}</dd>
-        </div>
         <div>
           <dt>截止</dt>
           <dd>{formatDue(commitment)}</dd>
@@ -161,6 +161,10 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
         <div>
           <dt>置信度</dt>
           <dd>{Math.round(commitment.confidence * 100)}%</dd>
+        </div>
+        <div>
+          <dt>来源</dt>
+          <dd>{commitment.source_text_id ? "AI 提取" : "手动"}</dd>
         </div>
       </dl>
       {commitment.suggested_follow_up_date ? (
@@ -180,7 +184,7 @@ function CommitmentCard({ commitment }: { commitment: Commitment }) {
         ) : (
           <CheckCircle2 size={14} />
         )}
-        {toggling ? "更新中…" : isDone ? "恢复" : "完成"}
+        {toggling ? "更新中…" : isDone ? "恢复追踪" : "标记完成"}
       </button>
     </article>
   );

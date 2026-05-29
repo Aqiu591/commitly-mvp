@@ -126,7 +126,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
         <div>
           <p className="eyebrow">原文信息</p>
           <h2>先看上下文，再改承诺</h2>
-          <p className="source-note">原文只用于审核证据。需要更少留存时，可以在这里删除原文。</p>
+          <p className="source-note">原文只用于审核证据。如需减少留存，可在此删除原文。</p>
         </div>
         <dl className="source-meta">
           <div>
@@ -181,6 +181,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
           </ol>
         </div>
         {notice ? <p className="status-message success">{notice}</p> : null}
+        {error ? <p className="status-message error">{error}</p> : null}
         {sourceText.ai_error ? <p className="error-text">{sourceText.ai_error}</p> : null}
       </aside>
 
@@ -189,7 +190,7 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
           <div>
             <p className="eyebrow">待确认</p>
             <h2>{items.length} 条候选承诺</h2>
-            <p>可直接编辑字段，删除误提项，最后一次性确认保存到看板。</p>
+            <p>可直接编辑字段、删除误提项，最后一次性确认保存。</p>
           </div>
           <div className="review-counters" aria-label="审核统计">
             <span>
@@ -207,11 +208,14 @@ export function ReviewWorkbench({ sourceText, commitments }: ReviewWorkbenchProp
           <div className="empty-state">
             <Check size={22} />
             <h2>没有待确认承诺</h2>
-            <p>可以直接完成审核，或返回导入页换一段更明确的沟通文本。</p>
+            <p>所有候选承诺已移除。可以直接完成审核，或返回导入页换一段更明确的沟通文本。</p>
+            <div className="empty-state-actions">
+              <a className="primary-link" href="/import">返回导入</a>
+            </div>
           </div>
         ) : (
           items.map((item, index) => (
-            <article className={`commitment-editor ${needsHumanReview(item) ? "needs-review" : ""}`} key={item.id}>
+            <article className={`commitment-editor ${needsHumanReview(item) ? "needs-review" : ""}`} key={item.id} style={{ animationDelay: `${index * 40}ms` }}>
               <header className="editor-heading">
                 <div className="editor-title-group">
                   <span className="count-pill">{index + 1}</span>

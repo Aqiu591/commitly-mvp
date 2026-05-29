@@ -110,49 +110,59 @@ export function LoginForm() {
 
   return (
     <form className="stack" onSubmit={handleSubmit}>
-      <label>
-        <span>邮箱地址</span>
-        <input
-          required
-          autoComplete="email"
-          type="email"
-          value={email}
-          onChange={(event) => {
-            setEmail(event.target.value);
-            clearMessage();
-          }}
-          placeholder="you@example.com"
-        />
-      </label>
-
-      <button className="primary-button" disabled={isSubmitting || isCompletingRedirect || !email.trim()} type="submit">
-        {isSubmitting ? (
-          <>
-            <LoaderCircle size={17} className="spin" />
-            发送中…
-          </>
-        ) : (
-          <>
-            <Mail size={17} />
-            发送登录邮件
-          </>
-        )}
-      </button>
-
-      {message && !isErrorMessage ? (
-        <p className="status-message success">{message}</p>
-      ) : null}
-
-      {message && isErrorMessage ? (
-        <p className="status-message error">{message}</p>
-      ) : null}
-
-      {!message ? (
-        <p className="form-message">
-          本地调试时，请确认 Supabase Auth 的 Redirect URLs 包含当前地址的 <code>/auth/callback</code>。
-          如果你在 <code>localhost</code> 和 <code>127.0.0.1</code> 之间切换，请两个地址都加入。
+      {isCompletingRedirect ? (
+        <p className="status-message loading">
+          <LoaderCircle size={15} className="spin" />
+          正在完成登录，请稍候…
         </p>
-      ) : null}
+      ) : (
+        <>
+          <label>
+            <span>邮箱地址</span>
+            <input
+              required
+              autoComplete="email"
+              type="email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                clearMessage();
+              }}
+              placeholder="you@example.com"
+              disabled={isSubmitting}
+            />
+          </label>
+
+          <button className="primary-button" disabled={isSubmitting || !email.trim()} type="submit">
+            {isSubmitting ? (
+              <>
+                <LoaderCircle size={17} className="spin" />
+                发送中…
+              </>
+            ) : (
+              <>
+                <Mail size={17} />
+                发送登录邮件
+              </>
+            )}
+          </button>
+
+          {message && !isErrorMessage ? (
+            <p className="status-message success">{message}</p>
+          ) : null}
+
+          {message && isErrorMessage ? (
+            <p className="status-message error">{message}</p>
+          ) : null}
+
+          {!message ? (
+            <p className="form-message">
+              本地调试时，请确认 Supabase Auth 的 Redirect URLs 包含当前地址的 <code>/auth/callback</code>。
+              如果你在 <code>localhost</code> 和 <code>127.0.0.1</code> 之间切换，请两个地址都加入。
+            </p>
+          ) : null}
+        </>
+      )}
     </form>
   );
 }

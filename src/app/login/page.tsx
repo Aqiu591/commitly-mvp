@@ -45,7 +45,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <div>
             <p className="eyebrow">登录</p>
             <h1>欢迎回到 Commitly</h1>
-            <p className="heading-note">用邮箱登录，继续追踪你的客户承诺。</p>
+            <p className="heading-note">用邮箱发送魔法链接，无需密码即可登录。</p>
           </div>
           {authError ? <p className="status-message error auth-error">{formatAuthCallbackMessage(authError)}</p> : null}
           <LoginForm />
@@ -53,11 +53,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
         <aside className="auth-side" aria-label="Commitly 工作流">
           <p className="eyebrow">工作流</p>
-          <h2>只追踪已经说清楚的承诺</h2>
+          <h2>只追踪说清楚的承诺</h2>
           <ul>
             <li>粘贴会议纪要、邮件或聊天记录。</li>
-            <li>先审核 AI 提取的草稿，再进入看板。</li>
-            <li>按今日、逾期、双方责任和完成状态查看。</li>
+            <li>审核 AI 提取的草稿，再确认进入看板。</li>
+            <li>按今日、逾期、双方责任和完成状态分组查看。</li>
           </ul>
         </aside>
       </div>

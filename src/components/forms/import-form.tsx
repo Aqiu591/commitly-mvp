@@ -73,7 +73,7 @@ export function ImportForm() {
 
   return (
     <form className="import-grid" onSubmit={handleSubmit}>
-      <section className="form-panel import-details-panel">
+      <section className="form-panel">
         <div className="panel-heading-small">
           <p className="eyebrow">上下文</p>
           <h2>这段沟通来自哪里</h2>
@@ -81,7 +81,7 @@ export function ImportForm() {
         </div>
         <div className="panel-kicker">
           <Sparkles size={15} />
-          <span>AI 生成待审核草稿，最终由你确认。</span>
+          <span>AI 生成待审核草稿，最终由你确认保存。</span>
         </div>
         <label>
           文本来源
@@ -116,9 +116,9 @@ export function ImportForm() {
           <input value={timezone} onChange={(event) => setTimezone(event.target.value)} required />
         </label>
         <ul className="helper-list" aria-label="导入提示">
-          <li>保留“谁答应了什么”和“什么时候完成”。</li>
-          <li>没有明确日期也可以导入，审核时会标记出来。</li>
-          <li>敏感原文可在审核页删除。</li>
+          <li>保留「谁答应了什么」和「什么时候完成」。</li>
+          <li>没有明确日期的承诺也会提取，审核时标记出来。</li>
+          <li>敏感原文可在审核页单独删除。</li>
         </ul>
       </section>
       <section className="form-panel text-panel">
@@ -140,7 +140,7 @@ export function ImportForm() {
             rows={16}
             value={rawText}
             onChange={(event) => setRawText(event.target.value)}
-            placeholder={"粘贴会议纪要、邮件、聊天记录或电话摘要。\n\n尽量保留：谁答应了什么、给谁、什么时候完成。"}
+            placeholder={"粘贴会议纪要、邮件、聊天记录或电话摘要。\n\n尽量保留这些信息：\n- 谁答应了什么\n- 给谁的承诺\n- 什么时候完成"}
           />
           <span className="form-hint">
             {trimmedTextLength < 3
@@ -159,12 +159,12 @@ export function ImportForm() {
         ) : null}
 
         <div className="form-actions">
-          <span className="form-message">下一步会进入审核页，不会直接写入正式看板。</span>
+          <span className="form-message">分析后进入审核页，不会直接写入看板。</span>
           <button className="primary-button" disabled={!canSubmit} type="submit">
             {isSubmitting ? (
               <>
                 <LoaderCircle className="spin" size={17} />
-                分析中…
+                AI 分析中…
               </>
             ) : (
               <>

@@ -18,6 +18,8 @@ export function SetupChecklist({
   const missingRequiredRows = requiredRows.filter((row) => !row.configured);
   const configuredRequiredCount = requiredRows.length - missingRequiredRows.length;
 
+  const progressPercent = requiredRows.length > 0 ? Math.round((configuredRequiredCount / requiredRows.length) * 100) : 100;
+
   return (
     <main className="page-shell setup-shell">
       <section className="page-heading">
@@ -51,6 +53,9 @@ export function SetupChecklist({
             {configuredRequiredCount}/{requiredRows.length}
           </strong>
           <span>关键配置</span>
+          <div className="setup-bar">
+            <div className="setup-bar-fill" style={{ width: `${progressPercent}%` }} />
+          </div>
         </div>
       </section>
 
@@ -70,6 +75,7 @@ export function SetupChecklist({
       <div className="setup-grid">
         {groups.map((group) => {
           const groupConfigured = group.rows.filter((r) => r.configured).length;
+          const groupTotal = group.rows.length;
           return (
             <section className="setup-group" key={group.title}>
               <div>
@@ -84,13 +90,13 @@ export function SetupChecklist({
                       <small>{row.required ? "关键" : "可选"}</small>
                     </span>
                     <span className={row.configured ? "status-ok" : "status-missing"}>
-                      {row.configured ? "已配置" : row.required ? "缺少" : "可选"}
+                      {row.configured ? "已配置" : row.required ? "缺少" : "未配置"}
                     </span>
                   </li>
                 ))}
               </ul>
               <p className="setup-group-progress">
-                {groupConfigured}/{group.rows.length} 项已配置
+                {groupConfigured}/{groupTotal} 项已配置
               </p>
             </section>
           );
@@ -104,11 +110,11 @@ export function SetupChecklist({
             复制 <code>.env.example</code> 的变量名到 <code>.env.local</code>，只在本机填写真实值。
           </li>
           <li>
-            先配置 Supabase，并执行 <code>supabase/migrations/001_init.sql</code>。
+            先配置 Supabase 两项，并执行 <code>supabase/migrations/001_init.sql</code>。
           </li>
           <li>再配置 OpenAI，让导入页可以提取承诺。</li>
           <li>最后配置 Resend、发件邮箱和 Vercel Cron，用于每日简报。</li>
-          <li>补齐后重启本地服务，再回到登录页。</li>
+          <li>补齐后重启本地服务，回到登录页即可开始使用。</li>
         </ol>
       </section>
     </main>
