@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Circle, LoaderCircle, LogIn, RotateCcw, Sparkles } from "lucide-react";
+import { CheckCircle2, Circle, LoaderCircle, LogIn, RotateCcw, Sparkles, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
@@ -332,6 +332,7 @@ function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitmen
   const cardRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
   const [toggling, setToggling] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, gx: 50, gy: 50 });
   const [isHovered, setIsHovered] = useState(false);
@@ -394,6 +395,38 @@ function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitmen
       setError("无法连接到 Commitly 服务，请稍后再试。");
     } finally {
       setToggling(false);
+    }
+  }
+
+  async function deleteCommitment() {
+    if (!isAuthenticated) {
+      openLogin();
+      return;
+    }
+
+    setError("");
+    setDeleting(true);
+
+    try {
+      const response = await fetch(`/api/commitments/${commitment.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "deleted" })
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        setError(result?.error ?? "删除失败，请稍后再试。");
+        return;
+      }
+
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch {
+      setError("无法连接到 Commitly 服务，请稍后再试。");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -500,21 +533,38 @@ function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitmen
         <p className="follow-up-line">建议跟进：{commitment.suggested_follow_up_date}</p>
       ) : null}
       {error ? <p className="error-text">{error}</p> : null}
-      <button
-        className="secondary-button compact card-action"
-        disabled={isPending || toggling}
-        onClick={() => setStatus(isDone ? "confirmed" : "done")}
-        type="button"
-      >
-        {toggling ? (
-          <LoaderCircle className="spin" size={14} />
-        ) : isDone ? (
-          <RotateCcw size={14} />
-        ) : (
-          <CheckCircle2 size={14} />
-        )}
-        {toggling ? "更新中…" : isDone ? "移回待处理" : "标记完成"}
-      </button>
+      <div className="card-actions-row">
+        <button
+          className="secondary-button compact card-action"
+          disabled={isPending || toggling || deleting}
+          onClick={() => setStatus(isDone ? "confirmed" : "done")}
+          type="button"
+        >
+          {toggling ? (
+            <LoaderCircle className="spin" size={14} />
+          ) : isDone ? (
+            <RotateCcw size={14} />
+          ) : (
+            <CheckCircle2 size={14} />
+          )}
+          {toggling ? "更新中…" : isDone ? "恢复" : "标记完成"}
+        </button>
+        {isDone ? (
+          <button
+            className="danger-button compact card-action"
+            disabled={deleting}
+            onClick={deleteCommitment}
+            type="button"
+          >
+            {deleting ? (
+              <LoaderCircle className="spin" size={14} />
+            ) : (
+              <Trash2 size={14} />
+            )}
+            {deleting ? "删除中…" : "删除"}
+          </button>
+        ) : null}
+      </div>
     </article>
   );
 }
