@@ -3,7 +3,7 @@ import type { CommitmentStatus } from "@/lib/types";
 const allowedTransitions: Record<CommitmentStatus, CommitmentStatus[]> = {
   draft: ["confirmed", "deleted"],
   confirmed: ["done", "deleted"],
-  done: ["confirmed"],
+  done: ["confirmed", "deleted"],
   deleted: []
 };
 

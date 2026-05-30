@@ -100,6 +100,7 @@ describe("domain helpers", () => {
     expect(canTransitionCommitmentStatus("draft", "confirmed")).toBe(true);
     expect(canTransitionCommitmentStatus("confirmed", "done")).toBe(true);
     expect(canTransitionCommitmentStatus("deleted", "confirmed")).toBe(false);
+    expect(canTransitionCommitmentStatus("done", "deleted")).toBe(true);
   });
 
   it("builds a raw text deletion patch", () => {
