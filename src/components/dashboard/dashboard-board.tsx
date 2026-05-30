@@ -12,6 +12,7 @@ type DashboardBoardProps = {
   sections: DashboardSections;
   today: string;
   isAuthenticated: boolean;
+  userEmail: string | null;
 };
 
 const sectionOrder: Array<{
@@ -22,22 +23,22 @@ const sectionOrder: Array<{
   emptyHint: string;
   tone: "neutral" | "urgent" | "done";
 }> = [
-  { key: "today", title: "今日到期", description: "今天需要完成或跟进", emptyMessage: "今天没有到期承诺", emptyHint: "导入新的沟通文本，AI 会自动提取截止日期", tone: "neutral" },
-  { key: "overdue", title: "已逾期", description: "需要优先补救", emptyMessage: "没有逾期承诺", emptyHint: "持续跟进今日到期项，避免产生新的逾期", tone: "urgent" },
-  { key: "iOwe", title: "我欠别人", description: "我方需要交付", emptyMessage: "没有待交付的承诺", emptyHint: "导入文本后，AI 会识别\"我/我方\"的责任", tone: "neutral" },
-  { key: "theyOwe", title: "别人欠我", description: "对方需要交付", emptyMessage: "没有待对方交付的承诺", emptyHint: "导入文本后，AI 会识别\"你/贵方/客户\"的责任", tone: "neutral" },
-  { key: "noDueDate", title: "无明确日期", description: "需要补充截止日期", emptyMessage: "没有待补日期的承诺", emptyHint: "审核时可以给缺少日期的承诺补充截止时间", tone: "neutral" },
-  { key: "done", title: "已完成", description: "已归档，可恢复", emptyMessage: "还没有已完成的承诺", emptyHint: "点击卡片上的\"标记完成\"来归档", tone: "done" }
+  { key: "today", title: "今日到期", description: "今天需要完成或跟进", emptyMessage: "今天没有到期承诺", emptyHint: "干干净净的一天，挺好。新的约定随时可以记下来", tone: "neutral" },
+  { key: "overdue", title: "已逾期", description: "需要优先补救", emptyMessage: "没有逾期承诺", emptyHint: "节奏感不错，继续保持这份从容", tone: "urgent" },
+  { key: "iOwe", title: "我欠别人", description: "我方需要交付", emptyMessage: "没有待交付的承诺", emptyHint: "手头清爽，心里踏实。答应过的事，一条都不会落下", tone: "neutral" },
+  { key: "theyOwe", title: "别人欠我", description: "对方需要交付", emptyMessage: "没有待对方交付的承诺", emptyHint: "暂时没人欠你什么。等有了约定，这里会替你记着", tone: "neutral" },
+  { key: "noDueDate", title: "无明确日期", description: "需要补充截止日期", emptyMessage: "没有待补日期的承诺", emptyHint: "每条承诺都有了时间锚点，心里更有谱", tone: "neutral" },
+  { key: "done", title: "已完成", description: "已归档，可恢复", emptyMessage: "还没有已完成的承诺", emptyHint: "划掉第一个承诺的那一刻，比什么都治愈", tone: "done" }
 ];
 
-export function DashboardBoard({ sections, today, isAuthenticated }: DashboardBoardProps) {
+export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: DashboardBoardProps) {
   const digestCount =
     sections.today.length + sections.overdue.length + sections.noDueDate.length + sections.iOwe.length + sections.theyOwe.length;
   const totalCount = digestCount + sections.done.length;
   const doneRatio = totalCount > 0 ? sections.done.length / totalCount : 0;
   const emptyBoard = digestCount === 0 && sections.done.length === 0;
 
-  const greeting = getTimeGreeting();
+  const greeting = getTimeGreeting(userEmail);
 
   return (
     <div style={{ position: "relative" }}>
@@ -46,7 +47,7 @@ export function DashboardBoard({ sections, today, isAuthenticated }: DashboardBo
       <div className="dashboard-grid">
         <section className="digest-card">
           <div>
-            <p className="eyebrow">{greeting} · 今日工作台</p>
+            <p className="eyebrow">{greeting}</p>
             <h2>
               {digestCount === 0
                 ? "今天没有待处理承诺"
@@ -160,12 +161,30 @@ export function DashboardBoard({ sections, today, isAuthenticated }: DashboardBo
   );
 }
 
-function getTimeGreeting() {
+function getTimeGreeting(userEmail: string | null) {
   const hour = new Date().getHours();
-  if (hour < 10) return "早上好";
-  if (hour < 14) return "中午好";
-  if (hour < 18) return "下午好";
-  return "晚上好";
+  let prefix: string;
+  if (hour < 10) prefix = "早上好";
+  else if (hour < 14) prefix = "中午好";
+  else if (hour < 18) prefix = "下午好";
+  else prefix = "晚上好";
+
+  const name = userNameFromEmail(userEmail);
+  return name ? `${prefix}，${name} · 今日工作台` : `${prefix} · 今日工作台`;
+}
+
+function userNameFromEmail(email: string | null) {
+  if (!email) return null;
+  const local = email.split("@")[0];
+  if (!local) return null;
+  // If it looks like a name (contains dots/underscores/hyphens), try to make it readable
+  const readable = local
+    .replace(/[._-]/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+  return readable || local;
 }
 
 function AnimatedNumber({ target }: { target: number }) {

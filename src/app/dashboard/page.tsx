@@ -35,6 +35,7 @@ export default async function DashboardPage() {
 
   const sections = buildDashboardSections(commitments, today);
   const isAuthenticated = Boolean(user);
+  const userEmail = user?.email ?? null;
 
   return (
     <main className="page-shell dashboard-shell">
@@ -50,7 +51,7 @@ export default async function DashboardPage() {
           </Link>
         ) : null}
       </section>
-      <DashboardBoard sections={sections} today={today} isAuthenticated={isAuthenticated} />
+      <DashboardBoard sections={sections} today={today} isAuthenticated={isAuthenticated} userEmail={userEmail} />
     </main>
   );
 }
