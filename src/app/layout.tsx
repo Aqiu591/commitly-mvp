@@ -93,6 +93,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </nav>
           </header>
           <div className="page-transition">{children}</div>
+          <div className="orb-secondary" aria-hidden="true" />
         </LoginOverlay>
       </body>
     </html>
