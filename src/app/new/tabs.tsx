@@ -1,7 +1,7 @@
 "use client";
 
 import { FileText, PencilLine } from "lucide-react";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 type Tab = "import" | "manual";
 
@@ -20,10 +20,10 @@ export function NewCommitmentTabs({
   const [tab, setTab] = useState<Tab>("import");
   const barRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number } | null>(null);
 
   // Measure the active button and slide the indicator
-  useEffect(() => {
+  const measureIndicator = useCallback(() => {
     const bar = barRef.current;
     const button = buttonRefs.current.get(tab);
     if (!bar || !button) return;
@@ -36,18 +36,30 @@ export function NewCommitmentTabs({
     });
   }, [tab]);
 
+  useEffect(() => {
+    measureIndicator();
+  }, [measureIndicator]);
+
+  // Keep indicator aligned on window resize
+  useEffect(() => {
+    window.addEventListener("resize", measureIndicator);
+    return () => window.removeEventListener("resize", measureIndicator);
+  }, [measureIndicator]);
+
   return (
     <div>
       <div className="tab-bar" ref={barRef} role="tablist" aria-label="新建方式">
-        {/* Sliding indicator pill */}
-        <div
-          className="tab-indicator"
-          style={{
-            left: indicatorStyle.left,
-            width: indicatorStyle.width
-          }}
-          aria-hidden="true"
-        />
+        {/* Sliding indicator pill — hidden until first measurement to avoid flash */}
+        {indicatorStyle ? (
+          <div
+            className="tab-indicator"
+            style={{
+              left: indicatorStyle.left,
+              width: indicatorStyle.width
+            }}
+            aria-hidden="true"
+          />
+        ) : null}
         {tabs.map(({ key, label, icon }) => (
           <button
             key={key}
