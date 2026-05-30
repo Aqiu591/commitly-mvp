@@ -40,8 +40,39 @@ export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: 
 
   const greeting = getTimeGreeting(userEmail);
 
+  // ── Spotlight glow: cursor-following ambient light ──
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [glowPos, setGlowPos] = useState({ x: 0, y: 0 });
+  const [glowVisible, setGlowVisible] = useState(false);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setGlowPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    if (!glowVisible) setGlowVisible(true);
+  }, [glowVisible]);
+
+  const handlePointerLeave = useCallback(() => setGlowVisible(false), []);
+  const handlePointerEnter = useCallback(() => setGlowVisible(true), []);
+
   return (
-    <div style={{ position: "relative" }}>
+    <div
+      ref={containerRef}
+      style={{ position: "relative" }}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      onPointerEnter={handlePointerEnter}
+    >
+      {/* Ambient spotlight that follows the cursor */}
+      <div
+        className="spotlight-glow"
+        style={{
+          left: glowPos.x,
+          top: glowPos.y,
+          opacity: glowVisible ? 1 : 0
+        }}
+        aria-hidden="true"
+      />
 
 
       <div className="dashboard-grid">
@@ -148,9 +179,9 @@ export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: 
                 </div>
               ) : (
                 sections[section.key].map((commitment, i) => (
-                  <div className="card-entrance" style={{ animationDelay: `${i * 50}ms` }} key={`${section.key}-${commitment.id}`}>
+                  <ScrollReveal key={`${section.key}-${commitment.id}`} index={i}>
                     <CommitmentCard commitment={commitment} isAuthenticated={isAuthenticated} />
-                  </div>
+                  </ScrollReveal>
                 ))
               )}
             </div>
@@ -185,6 +216,40 @@ function userNameFromEmail(email: string | null) {
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
   return readable || local;
+}
+
+/** IntersectionObserver-driven entrance: fades + slides up when scrolling into view. */
+function ScrollReveal({ children, index }: { children: React.ReactNode; index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.unobserve(node);
+        }
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -24px 0px" }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={visible ? "card-entrance" : ""}
+      style={visible ? { animationDelay: `${index * 60}ms` } : { opacity: 0 }}
+    >
+      {children}
+    </div>
+  );
 }
 
 function AnimatedNumber({ target }: { target: number }) {
