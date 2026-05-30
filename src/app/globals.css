@@ -19,13 +19,19 @@
   --done-bg: rgba(62, 124, 80, 0.08);
   --info: #286a9c;
   --info-bg: rgba(40, 106, 156, 0.06);
-  --shadow: 0 0 0 1px rgba(23, 33, 43, 0.04);
-  --shadow-md: 0 1px 4px rgba(23, 33, 43, 0.04);
-  --shadow-lg: 0 2px 12px rgba(23, 33, 43, 0.05);
+
+  /* Stripe-inspired layered shadows */
+  --shadow-ring: 0 0 0 1px rgba(23, 33, 43, 0.05);
+  --shadow-xs: 0 1px 2px rgba(23, 33, 43, 0.04);
+  --shadow-sm: 0 2px 8px rgba(23, 33, 43, 0.06);
+  --shadow-md: 0 4px 16px rgba(23, 33, 43, 0.07);
+  --shadow-lg: 0 8px 32px rgba(23, 33, 43, 0.09);
+
   --radius: 8px;
   --radius-sm: 6px;
   --transition: 150ms ease;
   --transition-slow: 250ms ease;
+  --transition-spring: 200ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -208,7 +214,7 @@ button:disabled {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-xs);
 }
 
 .auth-side {
@@ -310,7 +316,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(23, 107, 91, 0.1);
+  box-shadow: 0 0 0 1px var(--primary), 0 0 0 4px rgba(23, 107, 91, 0.08);
   outline: none;
 }
 
@@ -323,7 +329,7 @@ textarea:user-invalid {
 input:user-invalid:focus,
 select:user-invalid:focus,
 textarea:user-invalid:focus {
-  box-shadow: 0 0 0 3px rgba(184, 87, 58, 0.1);
+  box-shadow: 0 0 0 1px rgba(184, 87, 58, 0.5), 0 0 0 4px rgba(184, 87, 58, 0.08);
 }
 
 input:disabled,
@@ -337,7 +343,7 @@ textarea:disabled {
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 input:focus-visible,
@@ -351,7 +357,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(23, 107, 91, 0.12);
+  box-shadow: 0 0 0 1px var(--primary), 0 0 0 4px rgba(23, 107, 91, 0.08);
 }
 
 .primary-button,
@@ -371,17 +377,19 @@ textarea:focus-visible {
   font-weight: 650;
   font-size: 0.9rem;
   white-space: nowrap;
-  transition: background var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  transition: background var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition-spring);
   user-select: none;
 }
 
+/* Stripe-style press: subtle inset feel */
 .primary-button:not(:disabled):active,
 .primary-link:not(:disabled):active,
 .secondary-button:not(:disabled):active,
 .danger-button:not(:disabled):active,
 .icon-text-button:not(:disabled):active,
 .icon-button:not(:disabled):active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  box-shadow: inset 0 1px 2px rgba(23, 33, 43, 0.08);
 }
 
 .primary-button,
@@ -393,7 +401,7 @@ textarea:focus-visible {
 .primary-button:hover:not(:disabled),
 .primary-link:hover:not(:disabled) {
   background: var(--primary-hover);
-  box-shadow: 0 2px 8px rgba(23, 107, 91, 0.18);
+  box-shadow: var(--shadow-xs), 0 2px 8px rgba(23, 107, 91, 0.18);
 }
 
 .secondary-button,
@@ -409,6 +417,7 @@ textarea:focus-visible {
 .icon-button:hover:not(:disabled) {
   border-color: var(--line-strong);
   background: var(--surface-muted);
+  box-shadow: var(--shadow-xs);
 }
 
 .danger-button {
@@ -510,14 +519,14 @@ textarea:focus-visible {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-ring);
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .form-panel:focus-within,
 .commitment-editor:focus-within {
   border-color: var(--line-strong);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-xs);
 }
 
 .form-panel {
@@ -920,7 +929,7 @@ dd {
   height: calc(100% - 6px);
   border-radius: 6px;
   background: var(--surface);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-xs);
   z-index: 0;
   transition: left 280ms cubic-bezier(0.22, 1, 0.36, 1), width 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -978,7 +987,7 @@ dd {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.92);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   z-index: 5;
 }
 
@@ -1099,14 +1108,16 @@ dd {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
   flex-shrink: 0;
 }
 
 .board-column header p {
-  margin: 3px 0 0;
+  margin: 2px 0 0;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.77rem;
   font-weight: 600;
 }
 
@@ -1170,7 +1181,8 @@ dd {
 
 .commitment-card:hover {
   border-color: var(--line-strong);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-xs);
+  transform: translateY(-1px);
 }
 
 .card-title-row {
@@ -1636,7 +1648,7 @@ dd {
 }
 
 .card-hovered {
-  box-shadow: 0 4px 20px rgba(23, 33, 43, 0.08);
+  box-shadow: var(--shadow-sm);
   border-color: var(--line-strong);
 }
 
