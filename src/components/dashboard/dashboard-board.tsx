@@ -83,7 +83,7 @@ export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: 
             <div>
               <h2>把承诺从聊天记录里，搬到看板上</h2>
               <p>
-                粘贴会议纪要、邮件或聊天记录，AI 自动提取承诺，按"今日到期 / 已逾期 / 我欠别人 / 别人欠我"
+                粘贴会议纪要、邮件或聊天记录，自动提取承诺，按"今日到期 / 已逾期 / 我欠别人 / 别人欠我"
                 分组追踪。不连 CRM，不接通讯工具，只做承诺追踪一件事。
               </p>
               <div className="hero-actions">
@@ -114,7 +114,7 @@ export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: 
           <section className="dashboard-empty">
             <div>
               <h2>还没有承诺</h2>
-              <p>导入一段会议纪要、邮件或聊天记录，AI 提取后审核确认就会出现在这里。</p>
+              <p>导入一段会议纪要、邮件或聊天记录，提取后审核确认就会出现在这里。</p>
             </div>
             <Link className="primary-link" href="/new">
               去新建
@@ -183,7 +183,7 @@ function userNameFromEmail(email: string | null) {
     .split(" ")
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join("");
+    .join(" ");
   return readable || local;
 }
 
