@@ -1,6 +1,6 @@
 export default function DashboardLoading() {
   const skeletonCard = (key: number) => (
-    <div className="commitment-card" key={key} style={{ padding: "12px", gap: "8px" }}>
+    <div className="commitment-card" key={key}>
       <div className="card-title-row" style={{ gap: "8px" }}>
         <div className="skeleton" style={{ width: "16px", height: "16px", borderRadius: "50%" }} />
         <div>

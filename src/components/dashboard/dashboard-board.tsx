@@ -312,7 +312,7 @@ function ProgressRing({ ratio }: { ratio: number }) {
           dominantBaseline="central"
           fill="currentColor"
           fontSize="11"
-          fontWeight="750"
+          fontWeight="700"
         >
           {Math.round(ratio * 100)}%
         </text>
