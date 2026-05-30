@@ -27,7 +27,7 @@ export function SetupChecklist({
           <p className="eyebrow">配置</p>
           <h1>{title}</h1>
         </div>
-        <Link className="primary-link" href="/login">
+        <Link className="primary-link" href="/?login=1">
           返回登录
         </Link>
       </section>

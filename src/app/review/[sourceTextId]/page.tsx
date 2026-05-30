@@ -21,7 +21,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/?login=1");
   }
 
   const { data: sourceText } = await supabase

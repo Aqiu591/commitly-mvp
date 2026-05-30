@@ -14,7 +14,7 @@ export default async function NewPage() {
   const { user } = await requireUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/?login=1");
   }
 
   return (

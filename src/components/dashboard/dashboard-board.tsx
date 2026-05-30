@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
 import type { DashboardSections } from "@/lib/dashboard/sections";
 import type { Commitment } from "@/lib/types";
+import { useLogin } from "@/lib/login-context";
 
 type DashboardBoardProps = {
   sections: DashboardSections;
@@ -39,6 +40,7 @@ export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: 
   const emptyBoard = digestCount === 0 && sections.done.length === 0;
 
   const greeting = getTimeGreeting(userEmail);
+  const { openLogin } = useLogin();
 
   // ── Spotlight glow: cursor-following ambient light ──
   const containerRef = useRef<HTMLDivElement>(null);
@@ -118,10 +120,10 @@ export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: 
                 分组追踪。不连 CRM，不接通讯工具，只做承诺追踪一件事。
               </p>
               <div className="hero-actions">
-                <Link className="primary-button" href="/login">
+                <button className="primary-button" onClick={openLogin} type="button">
                   <LogIn size={16} />
                   登录开始使用
-                </Link>
+                </button>
                 <Link className="secondary-button" href="/new">
                   先体验新建
                 </Link>
@@ -135,7 +137,7 @@ export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: 
             <p>
               <Sparkles size={14} />
               这是你的承诺看板。
-              <Link href="/login">登录</Link>
+              <button className="auth-cta-login-link" onClick={openLogin} type="button">登录</button>
               后可导入新文本、标记完成状态。
             </p>
           </div>
@@ -324,6 +326,7 @@ function ProgressRing({ ratio }: { ratio: number }) {
 
 function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitment; isAuthenticated: boolean }) {
   const router = useRouter();
+  const { openLogin } = useLogin();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
   const [toggling, setToggling] = useState(false);
@@ -358,7 +361,7 @@ function CommitmentCard({ commitment, isAuthenticated }: { commitment: Commitmen
 
   async function setStatus(status: "confirmed" | "done") {
     if (!isAuthenticated) {
-      router.push("/login");
+      openLogin();
       return;
     }
 

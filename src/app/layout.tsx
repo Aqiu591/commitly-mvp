@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 
+import { LoginOverlay } from "@/components/auth/login-overlay";
 import { NavLinks } from "@/components/nav-links";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import "./globals.css";
@@ -81,16 +82,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body>
-        <header className="topbar">
-          <Link className="brand" href="/dashboard">
-            Commitly
-          </Link>
-          <nav className="nav-links" aria-label="Primary">
-            <NavLinks />
-            <SignOutButton />
-          </nav>
-        </header>
-        <div className="page-transition">{children}</div>
+        <LoginOverlay>
+          <header className="topbar">
+            <Link className="brand" href="/dashboard">
+              Commitly
+            </Link>
+            <nav className="nav-links" aria-label="Primary">
+              <NavLinks />
+              <SignOutButton />
+            </nav>
+          </header>
+          <div className="page-transition">{children}</div>
+        </LoginOverlay>
       </body>
     </html>
   );
