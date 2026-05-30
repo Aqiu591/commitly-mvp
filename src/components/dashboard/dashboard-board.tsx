@@ -22,14 +22,15 @@ const sectionOrder: Array<{
   description: string;
   emptyMessage: string;
   emptyHint: string;
+  emptySymbol: string;
   tone: "neutral" | "urgent" | "done";
 }> = [
-  { key: "today", title: "今日到期", description: "今天需要完成或跟进", emptyMessage: "今天没有到期承诺", emptyHint: "干干净净的一天，挺好。新的约定随时可以记下来", tone: "neutral" },
-  { key: "overdue", title: "已逾期", description: "需要优先补救", emptyMessage: "没有逾期承诺", emptyHint: "节奏感不错，继续保持这份从容", tone: "urgent" },
-  { key: "iOwe", title: "我欠别人", description: "我方需要交付", emptyMessage: "没有待交付的承诺", emptyHint: "手头清爽，心里踏实。答应过的事，一条都不会落下", tone: "neutral" },
-  { key: "theyOwe", title: "别人欠我", description: "对方需要交付", emptyMessage: "没有待对方交付的承诺", emptyHint: "暂时没人欠你什么。等有了约定，这里会替你记着", tone: "neutral" },
-  { key: "noDueDate", title: "无明确日期", description: "需要补充截止日期", emptyMessage: "没有待补日期的承诺", emptyHint: "每条承诺都有了时间锚点，心里更有谱", tone: "neutral" },
-  { key: "done", title: "已完成", description: "已归档，可恢复", emptyMessage: "还没有已完成的承诺", emptyHint: "划掉第一个承诺的那一刻，比什么都治愈", tone: "done" }
+  { key: "today", title: "今日到期", description: "今天需要完成或跟进", emptyMessage: "今天没有到期承诺", emptyHint: "干干净净的一天，挺好", emptySymbol: "☀️", tone: "neutral" },
+  { key: "overdue", title: "已逾期", description: "需要优先补救", emptyMessage: "没有逾期承诺", emptyHint: "节奏感不错，继续保持", emptySymbol: "⚡", tone: "urgent" },
+  { key: "iOwe", title: "我欠别人", description: "我方需要交付", emptyMessage: "手头清爽", emptyHint: "答应过的事，一条都不会落下", emptySymbol: "🤝", tone: "neutral" },
+  { key: "theyOwe", title: "别人欠我", description: "对方需要交付", emptyMessage: "暂时没人欠你", emptyHint: "等有了约定，这里替你记着", emptySymbol: "👀", tone: "neutral" },
+  { key: "noDueDate", title: "无明确日期", description: "需要补充截止日期", emptyMessage: "都有了时间锚点", emptyHint: "心里更有谱，做事更从容", emptySymbol: "⚓", tone: "neutral" },
+  { key: "done", title: "已完成", description: "已归档，可恢复", emptyMessage: "还没有已完成的承诺", emptyHint: "划掉第一个的那一刻，比什么都治愈", emptySymbol: "✨", tone: "done" }
 ];
 
 export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: DashboardBoardProps) {
@@ -176,6 +177,7 @@ export function DashboardBoard({ sections, today, isAuthenticated, userEmail }: 
             <div className="card-stack">
               {sections[section.key].length === 0 ? (
                 <div className="empty-column-state">
+                  <span className="empty-column-symbol" aria-hidden="true">{section.emptySymbol}</span>
                   <p>{section.emptyMessage}</p>
                   <p className="form-message">{section.emptyHint}</p>
                 </div>
