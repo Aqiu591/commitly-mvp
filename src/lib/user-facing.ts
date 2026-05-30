@@ -6,7 +6,11 @@ const riskFlagLabels: Record<string, string> = {
   low_confidence: "AI 信心偏低",
   conditional_language: "带条件，需要人工确认",
   ambiguous_owner: "责任人不够明确",
-  ambiguous_due_date: "日期可能需要确认"
+  vague_due_date: "日期不够精确",
+  insufficient_evidence: "证据不足",
+  relative_due_date: "相对日期需确认",
+  dependent_due_date: "依赖未定事件",
+  needs_follow_up: "需后续跟进"
 };
 
 export function formatRiskFlag(flag: string) {

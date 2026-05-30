@@ -6,7 +6,7 @@ import { FormEvent, useState, useTransition } from "react";
 
 export function QuickCreateForm() {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);

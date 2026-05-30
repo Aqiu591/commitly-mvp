@@ -36,6 +36,10 @@ export default function DashboardLoading() {
             <div className="skeleton" style={{ width: "180px", height: "14px", marginTop: "8px" }} />
           </div>
           <div className="digest-metrics">
+            <span>
+              <div className="skeleton" style={{ width: "32px", height: "32px", borderRadius: "50%", margin: "0 auto" }} />
+              <div className="skeleton" style={{ width: "24px", height: "11px", margin: "4px auto 0" }} />
+            </span>
             {Array.from({ length: 3 }).map((_, i) => (
               <span key={i}>
                 <div className="skeleton" style={{ width: "32px", height: "20px", margin: "0 auto" }} />

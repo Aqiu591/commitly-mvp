@@ -19,8 +19,11 @@ export async function createSupabaseServerClient() {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
           });
-        } catch {
+        } catch (error) {
           // Server Components cannot always set cookies; middleware refreshes them.
+          if (process.env.NODE_ENV === "development") {
+            console.warn("[supabase/server] 无法设置 cookie，将由 middleware 刷新：", error instanceof Error ? error.message : error);
+          }
         }
       }
     }

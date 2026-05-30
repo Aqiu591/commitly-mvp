@@ -1,14 +1,6 @@
 import { z } from "zod";
 
-const nullableDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/)
-  .nullable();
-
-const nullableTime = z
-  .string()
-  .regex(/^\d{2}:\d{2}$/)
-  .nullable();
+import { nullableDate, nullableTime } from "@/lib/validation";
 
 export const aiCommitmentSchema = z.object({
   provisional_id: z.string().min(1),

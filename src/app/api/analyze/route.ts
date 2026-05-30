@@ -5,6 +5,7 @@ import { AiIncompleteError, AiParseError, AiRefusalError } from "@/lib/ai/respon
 import { mapAiCommitmentsToDraftRows } from "@/lib/commitments/map-ai";
 import { serverEnv } from "@/lib/env.server";
 import { jsonError, validationError } from "@/lib/http";
+import { checkRateLimit, clientKey, rateLimitResponse } from "@/lib/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatMissingConfigMessage, missingEnvNameFromError } from "@/lib/user-facing";
 import { analyzeRequestSchema } from "@/lib/validation";
@@ -12,6 +13,15 @@ import { analyzeRequestSchema } from "@/lib/validation";
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
+  const rateLimit = checkRateLimit({
+    key: `analyze:${clientKey(request)}`,
+    limit: 10,
+    windowSeconds: 60
+  });
+
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit.remaining, rateLimit.resetAt);
+  }
   const body = await request.json().catch(() => null);
   const parsed = analyzeRequestSchema.safeParse(body);
 

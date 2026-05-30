@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
   const now = new Date().toISOString();
 
-  await Promise.all(
+  const updateResults = await Promise.all(
     commitments.map((commitment) =>
       supabase
         .from("commitments")
@@ -80,6 +80,11 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
     )
   );
+
+  const failedUpdates = updateResults.filter((r) => r.error);
+  if (failedUpdates.length > 0) {
+    return jsonError("部分承诺确认失败，请刷新后重试。", 500, failedUpdates.map((f) => f.error?.message));
+  }
 
   const removedIds = existing.filter((commitment) => !keptIds.has(commitment.id)).map((commitment) => commitment.id);
 

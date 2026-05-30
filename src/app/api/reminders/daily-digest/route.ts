@@ -72,40 +72,48 @@ async function handleDailyDigest(request: NextRequest) {
 
   const resend = new Resend(resendApiKey.value);
   const { messages, skipped } = buildDailyDigestMessages(groups, emailByUserId, dailyDigestFrom.value);
-  let sent = 0;
 
-  for (const message of messages) {
-    const group = groups.find((digestGroup) => digestGroup.userId === message.userId);
+  const sendResults = await Promise.allSettled(
+    messages.map(async (message) => {
+      const group = groups.find((digestGroup) => digestGroup.userId === message.userId);
+      if (!group) return { userId: message.userId, sent: false };
 
-    if (!group) {
-      continue;
-    }
-
-    const sendResult = await resend.emails.send(message.email);
-
-    if (sendResult.error) {
-      return jsonError("每日简报发送失败。请检查 Resend 发件域名、API Key 和收件人邮箱。", 502, sendResult.error.message);
-    }
-
-    await supabase.from("reminders").insert({
-      commitment_id: null,
-      user_id: message.userId,
-      reminder_type: "daily_digest",
-      scheduled_for: today,
-      sent_at: new Date().toISOString(),
-      channel: "email",
-      payload: {
-        dueToday: group.dueToday.length,
-        overdue: group.overdue.length,
-        followUps: group.followUps.length,
-        noDueDate: group.noDueDate.length
+      const sendResult = await resend.emails.send(message.email);
+      if (sendResult.error) {
+        return { userId: message.userId, sent: false, error: sendResult.error.message };
       }
-    });
 
-    sent += 1;
+      await supabase.from("reminders").insert({
+        commitment_id: null,
+        user_id: message.userId,
+        reminder_type: "daily_digest",
+        scheduled_for: today,
+        sent_at: new Date().toISOString(),
+        channel: "email",
+        payload: {
+          dueToday: group.dueToday.length,
+          overdue: group.overdue.length,
+          followUps: group.followUps.length,
+          noDueDate: group.noDueDate.length
+        }
+      });
+
+      return { userId: message.userId, sent: true };
+    })
+  );
+
+  const sent = sendResults.filter((r) => r.status === "fulfilled" && r.value.sent).length;
+  const failed = sendResults.filter((r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.sent));
+  const firstError = failed.find(
+    (r): r is PromiseFulfilledResult<{ userId: string; sent: boolean; error?: string }> =>
+      r.status === "fulfilled" && !r.value.sent
+  )?.value?.error;
+
+  if (failed.length > 0 && sent === 0) {
+    return jsonError("每日简报发送失败。请检查 Resend 发件域名、API Key 和收件人邮箱。", 502, firstError);
   }
 
-  return NextResponse.json({ sent, skipped });
+  return NextResponse.json({ sent, skipped, failed: failed.length });
 }
 
 function readRequiredConfig(

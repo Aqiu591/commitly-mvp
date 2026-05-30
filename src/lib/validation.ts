@@ -7,9 +7,9 @@ export const analyzeRequestSchema = z.object({
   customerName: nonEmptyString,
   contactName: z.string().trim().optional().default(""),
   projectName: z.string().trim().optional().default(""),
-  communicatedAt: nonEmptyString,
+  communicatedAt: z.string().datetime({ offset: true }).refine((val) => val.endsWith("Z") || val.includes("+") || val.includes("-"), "必须包含时区信息"),
   timezone: nonEmptyString,
-  rawText: z.string().trim().min(3)
+  rawText: z.string().trim().min(3).max(10000)
 });
 
 export type AnalyzeRequestInput = z.infer<typeof analyzeRequestSchema>;
@@ -21,12 +21,12 @@ export const emailOtpVerifyRequestSchema = z.object({
 
 export type EmailOtpVerifyRequestInput = z.infer<typeof emailOtpVerifyRequestSchema>;
 
-const nullableDate = z
+export const nullableDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/)
   .nullable();
 
-const nullableTime = z
+export const nullableTime = z
   .string()
   .regex(/^\d{2}:\d{2}$/)
   .nullable();
