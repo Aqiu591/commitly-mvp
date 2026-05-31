@@ -1,5 +1,4 @@
-import { ArrowRight, BarChart3, BellRing, FileText, Sparkles, Zap } from "lucide-react";
-import Link from "next/link";
+import { BarChart3, BellRing, FileText, Sparkles, Zap } from "lucide-react";
 import { Suspense } from "react";
 
 import { LandingAutoLogin } from "@/components/landing-auto-login";
@@ -27,13 +26,7 @@ export default function HomePage() {
           <p className="landing-hero-sub">
             把散落在会议纪要、邮件、聊天记录里的每一句"我来""你负责""周五前"，变成一条条清清楚楚的承诺，按紧急程度排好，到期自动提醒。
           </p>
-          <div className="landing-hero-actions">
-            <LandingCTA />
-            <Link className="landing-secondary-cta" href="/dashboard">
-              先进看板逛逛
-              <ArrowRight size={15} />
-            </Link>
-          </div>
+          <LandingCTA />
         </div>
 
         {/* Visual demo card */}
