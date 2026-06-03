@@ -1887,6 +1887,133 @@ dd {
   font-weight: 650;
 }
 
+/* ── Drop Zone ── */
+
+.drop-zone-stack {
+  display: grid;
+  gap: 6px;
+}
+
+.drop-zone {
+  display: grid;
+  place-items: center;
+  min-height: 64px;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+  user-select: none;
+}
+
+.drop-zone:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-strong);
+}
+
+.drop-zone:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.drop-zone-active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+.drop-zone-filled {
+  border-style: solid;
+  border-color: rgba(62, 124, 80, 0.25);
+  background: rgba(62, 124, 80, 0.06);
+}
+
+.drop-zone-error {
+  border-color: rgba(184, 87, 58, 0.35);
+  background: rgba(184, 87, 58, 0.06);
+}
+
+.drop-zone-input {
+  display: none;
+}
+
+.drop-zone-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.drop-zone-prompt svg {
+  color: var(--soft);
+  transition: color var(--transition);
+}
+
+.drop-zone:hover .drop-zone-prompt svg,
+.drop-zone-active .drop-zone-prompt svg {
+  color: var(--primary);
+}
+
+.drop-zone-icon-active {
+  color: var(--primary) !important;
+}
+
+.drop-zone-hint {
+  color: var(--soft);
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+.drop-zone-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--done);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.drop-zone-file-name {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.drop-zone-clear {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.drop-zone-clear:hover {
+  background: var(--surface-muted);
+  color: var(--accent);
+  border-color: rgba(184, 87, 58, 0.25);
+}
+
+.drop-zone-error-text {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 4px 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .spin,
   .skeleton {

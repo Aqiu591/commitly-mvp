@@ -4,6 +4,7 @@ import { CheckCircle2, ClipboardPaste, LoaderCircle, Sparkles } from "lucide-rea
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { DropZone } from "@/components/forms/drop-zone";
 import { formatImportFailureMessage } from "@/lib/user-facing";
 
 const sourceTypes = ["会议纪要", "邮件文本", "聊天记录", "电话摘要", "其他"];
@@ -131,6 +132,10 @@ export function ImportForm() {
             {trimmedTextLength} 字
           </span>
         </div>
+        <DropZone
+          onFileContent={(content) => setRawText(content)}
+          hasContent={trimmedTextLength > 0}
+        />
         <label>
           沟通原文
           <textarea
